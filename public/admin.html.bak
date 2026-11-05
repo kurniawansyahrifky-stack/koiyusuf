@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Control Room — Sabaku Nishikigoi Farm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>body { background-color: #080C14; color: #E5E7EB; font-family: sans-serif; }</style>
+</head>
+<body class="p-5 md:p-8 max-w-7xl mx-auto space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-4">
+    <div>
+      <h2 class="text-2xl font-bold text-amber-400 flex items-center gap-2">
+        <i class="fa-solid fa-gavel"></i> Control Room Live Lelang & Toko Koi
+      </h2>
+      <p class="text-xs text-gray-400">Edit data jualan, verifikasi deposit Rp 50.000, kelola lelang, dan sosmed.</p>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="loadAdminData()" class="px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-xs text-amber-300 rounded flex items-center gap-1.5">
+        <i class="fa-solid fa-rotate"></i> Refresh Data
+      </button>
+      <a href="/" target="_blank" class="px-3.5 py-2 bg-[#C5A059] text-black font-bold text-xs rounded flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Web
+      </a>
+    </div>
+  </div>
+
+  <!-- STATISTIK LIVE RINGKASAN HARGA LELANG -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-[#0E1420] border border-white/10 p-4 rounded-lg shadow">
+      <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Total Potensi Omzet Lelang:</span>
+      <h3 id="statTotalOmzet" class="text-xl font-bold text-amber-400 mt-1">Rp 0</h3>
+      <p class="text-[10px] text-emerald-400 mt-1">Akumulasi bid teratas berjalan</p>
+    </div>
+    <div class="bg-[#0E1420] border border-white/10 p-4 rounded-lg shadow">
+      <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Rekor Bid Tertinggi:</span>
+      <h3 id="statHighestBid" class="text-xl font-bold text-white mt-1">Rp 0</h3>
+      <p id="statHighestItem" class="text-[10px] text-gray-400 truncate mt-1">-</p>
+    </div>
+    <div class="bg-[#0E1420] border border-white/10 p-4 rounded-lg shadow">
+      <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Ikan Aktif Lelang:</span>
+      <h3 id="statActiveCount" class="text-xl font-bold text-emerald-400 mt-1">0 Ekor</h3>
+      <p class="text-[10px] text-gray-400 mt-1">Sedang diperebutkan penawar</p>
+    </div>
+    <div class="bg-[#0E1420] border border-white/10 p-4 rounded-lg shadow">
+      <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Peserta Lelang Terdaftar:</span>
+      <h3 id="statBiddersCount" class="text-xl font-bold text-blue-400 mt-1">0 Orang</h3>
+      <p class="text-[10px] text-gray-400 mt-1">Total peserta terdaftar</p>
+    </div>
+  </div>
+
+  <!-- TAB MENU -->
+  <div class="flex flex-wrap gap-2 border-b border-white/10 pb-2 text-xs font-bold">
+    <button onclick="tab('auction')" id="t-auction" class="px-4 py-2 bg-amber-500/20 text-amber-400 rounded">🔨 Monitoring Lelang</button>
+    <button onclick="tab('bidders')" id="t-bidders" class="px-4 py-2 text-gray-400 hover:text-white rounded">🛡️ Verifikasi Deposit Peserta</button>
+    <button onclick="tab('koi')" id="t-koi" class="px-4 py-2 text-gray-400 hover:text-white rounded">🐟 Katalog Reguler (Edit Jualan)</button>
+    <button onclick="tab('article')" id="t-article" class="px-4 py-2 text-gray-400 hover:text-white rounded">📖 Panduan & Penyakit</button>
+    <button onclick="tab('settings')" id="t-settings" class="px-4 py-2 text-gray-400 hover:text-white rounded">⚙️ Pengaturan WA & Sosmed</button>
+  </div>
+
+  <!-- TAB 1: MONITORING LELANG -->
+  <div id="sec-auction" class="space-y-6">
+    <div class="border border-white/10 bg-[#0E1420] p-6 rounded-lg space-y-4">
+      <h3 class="font-bold text-sm text-white flex items-center gap-2">
+        <i class="fa-solid fa-plus-circle text-amber-400"></i> Buka Sesi Lelang Baru
+      </h3>
+      <form onsubmit="addAuction(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+        <input type="text" id="aucCode" required placeholder="Kode (mis: A, B, C)" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="text" id="aucName" required placeholder="Nama Koi" class="p-2.5 bg-black border border-white/10 rounded text-white md:col-span-2">
+        <input type="text" id="aucVariety" required placeholder="Varietas" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="number" id="aucSize" required placeholder="Ukuran (cm)" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <select id="aucGender" class="p-2.5 bg-black border border-white/10 rounded text-white">
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+          <option value="Unsex">Unsex</option>
+        </select>
+        <input type="text" id="aucBreeder" placeholder="Breeder" class="p-2.5 bg-black border border-white/10 rounded text-white md:col-span-2">
+        <input type="number" id="aucOB" required placeholder="Open Bid (OB) Rp" class="p-2.5 bg-black border border-white/10 rounded text-white md:col-span-2">
+        <input type="number" id="aucStep" required placeholder="Kelipatan (KB) Rp" value="50000" class="p-2.5 bg-black border border-white/10 rounded text-white md:col-span-2">
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Waktu Selesai Lelang:</label>
+          <input type="datetime-local" id="aucEndTime" required class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Foto Ikan:</label>
+          <input type="file" id="aucFile" accept="image/*" class="text-xs text-gray-400">
+        </div>
+        <div class="md:col-span-4 pt-2">
+          <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase rounded shadow">Publikasikan Lelang</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabel Monitoring Lelang -->
+    <div class="border border-white/10 bg-[#0E1420] rounded-lg overflow-x-auto shadow-xl">
+      <table class="w-full text-xs text-left text-gray-300">
+        <thead class="bg-black/60 text-gray-400 uppercase text-[10px]">
+          <tr>
+            <th class="p-3">Kode & Ikan</th>
+            <th class="p-3">OB</th>
+            <th class="p-3">KB</th>
+            <th class="p-3 text-amber-400">Live Bid Tertinggi</th>
+            <th class="p-3">Kenaikan</th>
+            <th class="p-3">Pemimpin Saat Ini</th>
+            <th class="p-3">Sisa Waktu</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="aucTableBody" class="divide-y divide-white/5"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2: VERIFIKASI DEPOSIT PESERTA -->
+  <div id="sec-bidders" class="space-y-6 hidden">
+    <div class="border border-white/10 bg-[#0E1420] rounded-lg p-5 space-y-3">
+      <div>
+        <h3 class="font-bold text-white text-sm">Daftar Pendaftar Lelang & Verifikasi Deposit Rp 50.000</h3>
+        <p class="text-[11px] text-gray-400">Pastikan uang jaminan sudah masuk ke rekening/QRIS Anda sebelum klik tombol <b>Aktifkan Deposit</b>.</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left text-gray-300">
+          <thead class="bg-black/60 text-gray-400 uppercase text-[10px]">
+            <tr>
+              <th class="p-3">Nama</th>
+              <th class="p-3">WhatsApp</th>
+              <th class="p-3">Kota & Alamat</th>
+              <th class="p-3">Nominal</th>
+              <th class="p-3">Status Deposit</th>
+              <th class="p-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="biddersTableBody" class="divide-y divide-white/5"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: KATALOG REGULER (DENGAN TOMBOL EDIT, UBAH STATUS & HAPUS) -->
+  <div id="sec-koi" class="space-y-6 hidden">
+    <div class="border border-white/10 bg-[#0E1420] p-6 rounded-lg space-y-4">
+      <h3 class="font-bold text-sm text-white">+ Tambah Ikan Baru ke Katalog</h3>
+      <form onsubmit="addKoi(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+        <input type="text" id="koiName" required placeholder="Nama Koi (mis: Kohaku Maruten)" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="text" id="koiVariety" required placeholder="Varietas (Kohaku, Sanke, Showa, dll)" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="number" id="koiSize" required placeholder="Ukuran (cm)" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <select id="koiGender" class="p-2.5 bg-black border border-white/10 rounded text-white">
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+          <option value="Unsex">Unsex</option>
+        </select>
+        <input type="text" id="koiBreeder" placeholder="Breeder / Bloodline" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="number" id="koiPrice" required placeholder="Harga Pas (Rp)" class="p-2.5 bg-black border border-white/10 rounded text-white">
+        <div class="md:col-span-3">
+          <textarea id="koiDesc" rows="2" placeholder="Deskripsi pola, karakter ikan..." class="w-full p-2.5 bg-black border border-white/10 rounded text-white"></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Foto Ikan:</label>
+          <input type="file" id="koiFile" accept="image/*" class="text-xs text-gray-400">
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase rounded">Simpan Koi</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabel Daftar Ikan Reguler dengan Tombol EDIT -->
+    <div class="border border-white/10 bg-[#0E1420] rounded-lg overflow-x-auto shadow-xl">
+      <table class="w-full text-xs text-left text-gray-300">
+        <thead class="bg-black/60 text-gray-400 uppercase text-[10px]">
+          <tr>
+            <th class="p-3">Foto</th>
+            <th class="p-3">Nama</th>
+            <th class="p-3">Varietas</th>
+            <th class="p-3">Ukuran</th>
+            <th class="p-3">Harga</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-center">Aksi Kelola</th>
+          </tr>
+        </thead>
+        <tbody id="koiTableBody" class="divide-y divide-white/5"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: PANDUAN PENYAKIT -->
+  <div id="sec-article" class="space-y-6 hidden">
+    <div class="border border-white/10 bg-[#0E1420] p-6 rounded-lg space-y-3 text-xs">
+      <h3 class="font-bold text-sm text-white">+ Tambah Panduan Penyakit & Obat</h3>
+      <form onsubmit="addArticle(event)" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input type="text" id="artTitle" required placeholder="Judul Panduan" class="p-2.5 bg-black border border-white/10 rounded text-white">
+          <select id="artCategory" class="p-2.5 bg-black border border-white/10 rounded text-white">
+            <option value="Penyakit & Obat">Penyakit & Obat</option>
+            <option value="Perawatan & Karantina">Perawatan & Karantina</option>
+            <option value="Tips Kolam & Air">Tips Kolam & Air</option>
+          </select>
+        </div>
+        <textarea id="artContent" rows="3" required placeholder="Isi resep obat, takaran, dan penanganan..." class="w-full p-2.5 bg-black border border-white/10 rounded text-white"></textarea>
+        <button type="submit" class="py-2.5 px-6 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase rounded">Terbitkan</button>
+      </form>
+    </div>
+    <div id="artListAdmin" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  </div>
+
+  <!-- TAB 5: SOSMED & WA -->
+  <div id="sec-settings" class="space-y-6 hidden">
+    <div class="border border-white/10 bg-[#0E1420] p-6 rounded-lg max-w-xl text-xs space-y-4">
+      <h3 class="font-bold text-sm text-white">Pengaturan Kontak & Media Sosial</h3>
+      <form onsubmit="saveSettings(event)" class="space-y-3">
+        <input type="text" id="setWA" required placeholder="Nomor WhatsApp (62...)" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="text" id="setTikTok" placeholder="Link TikTok" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="text" id="setIG" placeholder="Link Instagram" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="text" id="setName" placeholder="Nama Farm" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        <input type="text" id="setTagline" placeholder="Tagline" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        <button type="submit" class="py-2.5 px-6 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase rounded">Simpan</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT IKAN KOI (POP-UP EDIT JUALAN) -->
+  <div id="editKoiModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0E1420] border border-amber-500/40 p-6 md:p-7 max-w-xl w-full rounded-lg shadow-2xl space-y-4 text-xs">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-amber-400"></i> Edit Data Ikan Jualan
+        </h3>
+        <button onclick="closeEditKoiModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+      </div>
+
+      <form onsubmit="submitEditKoi(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input type="hidden" id="editKoiId">
+
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Nama Ikan:</label>
+          <input type="text" id="editKoiName" required class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Varietas:</label>
+          <input type="text" id="editKoiVariety" required class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Ukuran (cm):</label>
+          <input type="number" id="editKoiSize" required class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Gender:</label>
+          <select id="editKoiGender" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Unsex">Unsex</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Breeder / Asal:</label>
+          <input type="text" id="editKoiBreeder" class="w-full p-2.5 bg-black border border-white/10 rounded text-white">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Harga Jual (Rp):</label>
+          <input type="number" id="editKoiPrice" required class="w-full p-2.5 bg-black border border-amber-500/40 font-bold text-amber-400 rounded">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Deskripsi:</label>
+          <textarea id="editKoiDesc" rows="2" class="w-full p-2.5 bg-black border border-white/10 rounded text-white"></textarea>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-[10px] text-gray-400 mb-1">Ganti Foto (Kosongkan jika tidak diganti):</label>
+          <input type="file" id="editKoiFile" accept="image/*" class="text-xs text-gray-400">
+        </div>
+
+        <div class="md:col-span-2 pt-2 flex gap-2">
+          <button type="button" onclick="closeEditKoiModal()" class="flex-1 py-2.5 bg-stone-800 text-gray-300 rounded font-bold">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase rounded">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let auctionsCache = [];
+    let koisCache = [];
+    const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+
+    function tab(name) {
+      ['auction','bidders','koi','article','settings'].forEach(t => {
+        document.getElementById('sec-' + t).classList.add('hidden');
+        document.getElementById('t-' + t).className = "px-4 py-2 text-gray-400 hover:text-white rounded";
+      });
+      document.getElementById('sec-' + name).classList.remove('hidden');
+      document.getElementById('t-' + name).className = "px-4 py-2 bg-amber-500/20 text-amber-400 rounded";
+    }
+
+    async function loadAdminData() {
+      // 1. Lelang
+      const aRes = await fetch('/api/auctions');
+      auctionsCache = await aRes.json();
+      
+      let totalOmzet = 0, highestBid = 0, highestItemName = "-", activeCount = 0;
+      auctionsCache.forEach(a => {
+        if (!a.is_closed) {
+          totalOmzet += a.current_bid;
+          activeCount++;
+          if (a.current_bid > highestBid) {
+            highestBid = a.current_bid;
+            highestItemName = `${a.code}. ${a.koi_name} (${a.variety})`;
+          }
+        }
+      });
+      document.getElementById('statTotalOmzet').innerText = formatIDR(totalOmzet);
+      document.getElementById('statHighestBid').innerText = formatIDR(highestBid);
+      document.getElementById('statHighestItem').innerText = highestItemName;
+      document.getElementById('statActiveCount').innerText = `${activeCount} Ekor Aktif`;
+
+      document.getElementById('aucTableBody').innerHTML = auctionsCache.map(a => {
+        const gain = a.current_bid - a.open_bid;
+        const gainPercent = a.open_bid > 0 ? Math.round((gain / a.open_bid) * 100) : 0;
+        const isClosed = a.is_closed || (new Date(a.end_time) <= new Date());
+
+        return `
+          <tr class="hover:bg-white/5 transition">
+            <td class="p-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded bg-[#C5A059] text-black font-black text-xs flex items-center justify-center">${a.code}</span>
+                <div>
+                  <b class="text-white block">${a.koi_name}</b>
+                  <span class="text-[10px] text-gray-400">${a.variety} • ${a.size_cm}cm</span>
+                </div>
+              </div>
+            </td>
+            <td class="p-3 font-mono text-gray-300 font-bold">${formatIDR(a.open_bid)}</td>
+            <td class="p-3 font-mono text-amber-300">+${formatIDR(a.bid_step)}</td>
+            <td class="p-3 font-mono font-bold text-amber-400 text-sm">${formatIDR(a.current_bid)}</td>
+            <td class="p-3 text-[11px] font-bold ${gain > 0 ? 'text-emerald-400' : 'text-gray-500'}">
+              ${gain > 0 ? `+${formatIDR(gain)} (+${gainPercent}%)` : 'Masih OB'}
+            </td>
+            <td class="p-3">
+              ${a.highest_bidder ? `
+                <b class="text-white block">${a.highest_bidder}</b>
+                <span class="text-[10px] text-gray-400 block">${a.highest_city}</span>
+                ${a.highest_wa ? `
+                  <a href="https://wa.me/${a.highest_wa}?text=${encodeURIComponent('Halo ' + a.highest_bidder + ', Anda memenangkan lelang ' + a.code + '. ' + a.koi_name + ' seharga ' + formatIDR(a.current_bid) + '.')}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-emerald-400 hover:underline mt-0.5">
+                    <i class="fa-brands fa-whatsapp"></i> Chat Pemenang
+                  </a>` : ''}
+              ` : '<span class="text-gray-500 italic">Belum Ada</span>'}
+            </td>
+            <td class="p-3 text-[11px] text-gray-400">
+              ${new Date(a.end_time).toLocaleDateString('id-ID', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+            </td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isClosed ? 'bg-red-900/60 text-red-200' : 'bg-emerald-900/60 text-emerald-200'}">
+                ${isClosed ? 'DITUTUP' : 'LIVE'}
+              </span>
+            </td>
+            <td class="p-3 text-center space-x-1">
+              <button onclick="toggleAuction(${a.id})" class="px-2 py-1 bg-stone-700 hover:bg-stone-600 text-gray-200 rounded text-[10px]">${isClosed ? 'Buka' : 'Tutup'}</button>
+              <button onclick="delAuction(${a.id})" class="px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 rounded text-[10px]"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // 2. Daftar Peserta & Deposit
+      const bRes = await fetch('/api/bidders');
+      const bidders = await bRes.json();
+      document.getElementById('statBiddersCount').innerText = `${bidders.length} Orang`;
+      document.getElementById('biddersTableBody').innerHTML = bidders.map(b => {
+        let statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-amber-900/60 text-amber-300">MENUNGGU TRANSFER</span>';
+        if (b.deposit_status === 'VERIFIED') statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-900 text-emerald-300 font-bold">DEPOSIT AKTIF</span>';
+        if (b.deposit_status === 'REFUNDED') statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-blue-900 text-blue-200">REFUNDED</span>';
+        if (b.deposit_status === 'HANGUS') statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-red-900 text-red-200 font-bold">HANGUS</span>';
+
+        return `
+          <tr class="hover:bg-white/5">
+            <td class="p-3 font-bold text-white">${b.name}</td>
+            <td class="p-3 font-mono">${b.phone}</td>
+            <td class="p-3"><b>${b.city}</b><br><span class="text-[10px] text-gray-400">${b.address}</span></td>
+            <td class="p-3 font-mono text-amber-400">${formatIDR(b.deposit_amount)}</td>
+            <td class="p-3">${statusBadge}</td>
+            <td class="p-3 text-center space-x-1">
+              <button onclick="setStatusBidder(${b.id}, 'VERIFIED')" class="px-2 py-1 bg-emerald-800 hover:bg-emerald-700 text-white rounded text-[10px]">Aktifkan Deposit</button>
+              <button onclick="setStatusBidder(${b.id}, 'REFUNDED')" class="px-2 py-1 bg-blue-900 hover:bg-blue-800 text-blue-200 rounded text-[10px]">Refund (Kalah)</button>
+              <button onclick="setStatusBidder(${b.id}, 'HANGUS')" class="px-2 py-1 bg-red-900 hover:bg-red-800 text-red-200 rounded text-[10px]">Hanguskan</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // 3. Katalog Reguler DENGAN TOMBOL EDIT
+      const kRes = await fetch('/api/koi');
+      koisCache = await kRes.json();
+      document.getElementById('koiTableBody').innerHTML = koisCache.map(k => `
+        <tr class="hover:bg-white/5">
+          <td class="p-3"><img src="${k.image}" class="w-10 h-10 object-cover rounded"></td>
+          <td class="p-3 font-bold text-white">${k.name}</td>
+          <td class="p-3">${k.variety}</td>
+          <td class="p-3">${k.size_cm} cm</td>
+          <td class="p-3 font-bold text-amber-400">${formatIDR(k.price)}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${k.is_sold ? 'bg-red-900/60 text-red-200' : 'bg-emerald-900/60 text-emerald-200'}">${k.is_sold ? 'TERJUAL' : 'READY'}</span></td>
+          <td class="p-3 text-center space-x-1.5">
+            <button onclick="openEditKoiModal(${k.id})" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded text-[10px] shadow flex-inline items-center gap-1">
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+            <button onclick="toggleSold(${k.id})" class="px-2 py-1 bg-stone-700 hover:bg-stone-600 text-white rounded text-[10px]">Ubah Status</button>
+            <button onclick="deleteKoi(${k.id})" class="px-2 py-1 bg-red-900/50 hover:bg-red-800 text-red-200 rounded text-[10px]">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+
+      // 4. Artikel
+      const artRes = await fetch('/api/articles');
+      const articles = await artRes.json();
+      document.getElementById('artListAdmin').innerHTML = articles.map(a => `
+        <div class="border border-white/10 bg-[#0E1420] p-4 rounded space-y-2">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded">${a.category}</span>
+            <button onclick="deleteArticle(${a.id})" class="text-[10px] text-red-400 hover:underline">Hapus</button>
+          </div>
+          <h4 class="font-bold text-white text-sm">${a.title}</h4>
+          <p class="text-xs text-gray-400 line-clamp-3">${a.content}</p>
+        </div>
+      `).join('');
+
+      // 5. Settings
+      const sRes = await fetch('/api/settings');
+      const set = await sRes.json();
+      if (set) {
+        document.getElementById('setWA').value = set.wa_number || '';
+        document.getElementById('setTikTok').value = set.tiktok_url || '';
+        document.getElementById('setIG').value = set.ig_url || '';
+        document.getElementById('setName').value = set.farm_name || '';
+        document.getElementById('setTagline').value = set.tagline || '';
+      }
+    }
+
+    // FUNGSI POP-UP EDIT IKAN KOI
+    function openEditKoiModal(id) {
+      const k = koisCache.find(x => x.id === id);
+      if (!k) return;
+
+      document.getElementById('editKoiId').value = k.id;
+      document.getElementById('editKoiName').value = k.name;
+      document.getElementById('editKoiVariety').value = k.variety;
+      document.getElementById('editKoiSize').value = k.size_cm;
+      document.getElementById('editKoiGender').value = k.gender || 'Female';
+      document.getElementById('editKoiBreeder').value = k.breeder || '';
+      document.getElementById('editKoiPrice').value = k.price;
+      document.getElementById('editKoiDesc').value = k.desc || '';
+      document.getElementById('editKoiFile').value = '';
+
+      document.getElementById('editKoiModal').classList.remove('hidden');
+    }
+
+    function closeEditKoiModal() {
+      document.getElementById('editKoiModal').classList.add('hidden');
+    }
+
+    async function submitEditKoi(e) {
+      e.preventDefault();
+      const id = document.getElementById('editKoiId').value;
+      const fd = new FormData();
+      fd.append('name', document.getElementById('editKoiName').value);
+      fd.append('variety', document.getElementById('editKoiVariety').value);
+      fd.append('size_cm', document.getElementById('editKoiSize').value);
+      fd.append('gender', document.getElementById('editKoiGender').value);
+      fd.append('breeder', document.getElementById('editKoiBreeder').value);
+      fd.append('price', document.getElementById('editKoiPrice').value);
+      fd.append('desc', document.getElementById('editKoiDesc').value);
+
+      const file = document.getElementById('editKoiFile').files[0];
+      if (file) fd.append('imageFile', file);
+
+      const res = await fetch(`/api/koi/${id}`, { method: 'PUT', body: fd });
+      if (res.ok) {
+        alert("✅ Data ikan berhasil diperbarui!");
+        closeEditKoiModal();
+        loadAdminData();
+      } else {
+        alert("Gagal memperbarui data ikan!");
+      }
+    }
+
+    async function addKoi(e) {
+      e.preventDefault();
+      const fd = new FormData();
+      fd.append('name', document.getElementById('koiName').value);
+      fd.append('variety', document.getElementById('koiVariety').value);
+      fd.append('size_cm', document.getElementById('koiSize').value);
+      fd.append('gender', document.getElementById('koiGender').value);
+      fd.append('breeder', document.getElementById('koiBreeder').value);
+      fd.append('price', document.getElementById('koiPrice').value);
+      fd.append('desc', document.getElementById('koiDesc').value);
+      const file = document.getElementById('koiFile').files[0];
+      if (file) fd.append('imageFile', file);
+
+      await fetch('/api/koi', { method: 'POST', body: fd });
+      alert('Ikan berhasil ditambahkan!');
+      e.target.reset();
+      loadAdminData();
+    }
+
+    async function toggleSold(id) { await fetch(`/api/koi/toggle-sold/${id}`, { method: 'POST' }); loadAdminData(); }
+    async function deleteKoi(id) { if (confirm('Hapus ikan ini?')) { await fetch(`/api/koi/${id}`, { method: 'DELETE' }); loadAdminData(); } }
+
+    async function setStatusBidder(id, status) {
+      if (confirm(`Ubah status peserta ini menjadi ${status}?`)) {
+        await fetch(`/api/bidders/status/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        loadAdminData();
+      }
+    }
+
+    async function addAuction(e) {
+      e.preventDefault();
+      const fd = new FormData();
+      fd.append('code', document.getElementById('aucCode').value);
+      fd.append('koi_name', document.getElementById('aucName').value);
+      fd.append('variety', document.getElementById('aucVariety').value);
+      fd.append('size_cm', document.getElementById('aucSize').value);
+      fd.append('gender', document.getElementById('aucGender').value);
+      fd.append('breeder', document.getElementById('aucBreeder').value);
+      fd.append('open_bid', document.getElementById('aucOB').value);
+      fd.append('bid_step', document.getElementById('aucStep').value);
+      fd.append('end_time', new Date(document.getElementById('aucEndTime').value).toISOString());
+      const file = document.getElementById('aucFile').files[0];
+      if (file) fd.append('imageFile', file);
+
+      await fetch('/api/auctions', { method: 'POST', body: fd });
+      alert("Lelang baru berhasil diterbitkan!");
+      e.target.reset();
+      loadAdminData();
+    }
+    async function toggleAuction(id) { await fetch(`/api/auctions/toggle/${id}`, { method: 'POST' }); loadAdminData(); }
+    async function delAuction(id) { if (confirm("Hapus item lelang ini?")) { await fetch(`/api/auctions/${id}`, { method: 'DELETE' }); loadAdminData(); } }
+
+    async function addArticle(e) {
+      e.preventDefault();
+      await fetch('/api/articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: document.getElementById('artTitle').value,
+          category: document.getElementById('artCategory').value,
+          content: document.getElementById('artContent').value
+        })
+      });
+      alert('Panduan diterbitkan!');
+      e.target.reset();
+      loadAdminData();
+    }
+    async function deleteArticle(id) { if (confirm('Hapus artikel ini?')) { await fetch(`/api/articles/${id}`, { method: 'DELETE' }); loadAdminData(); } }
+
+    async function saveSettings(e) {
+      e.preventDefault();
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wa_number: document.getElementById('setWA').value,
+          tiktok_url: document.getElementById('setTikTok').value,
+          ig_url: document.getElementById('setIG').value,
+          farm_name: document.getElementById('setName').value,
+          tagline: document.getElementById('setTagline').value
+        })
+      });
+      alert("Pengaturan disimpan!");
+    }
+
+    loadAdminData();
+  </script>
+</body>
+</html>

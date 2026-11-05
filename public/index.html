@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sabaku Nishikigoi — Living Jewels • Blitar Heritage</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0B0F14',
+            surface: '#131B26',
+            surfaceLight: '#1B2636',
+            borderSubtle: '#223247',
+            gold: '#D4AF37',
+            goldLight: '#F3E5AB',
+            crimson: '#E63946',
+            silk: '#F1F5F9',
+            mist: '#94A3B8'
+          },
+          fontFamily: {
+            serif: ['Cinzel', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #0B0F14; color: #F1F5F9; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 50%, #AA820A 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .custom-glass {
+      background: rgba(19, 27, 38, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-crimson selection:text-white">
+
+  <!-- ================= TOP PROMO BAR ================= -->
+  <div id="topPromoBar" class="hidden bg-gradient-to-r from-red-950 via-crimson to-red-950 text-silk text-xs md:text-sm font-medium py-2 px-4 text-center border-b border-red-700/40 relative z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-center gap-2">
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-white text-crimson uppercase">Promo</span>
+      <span id="promoText">🏮 SPECIAL EVENT: Dapatkan Garansi Ikan Hidup & Free Box Blitar ke Seluruh Indonesia!</span>
+      <a id="promoLink" href="#auctions" class="underline ml-2 hover:text-goldLight font-bold">Lihat Detail &rarr;</a>
+    </div>
+  </div>
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="sticky top-0 z-40 custom-glass border-b border-borderSubtle/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand -->
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full border border-gold/40 flex items-center justify-center bg-surfaceLight">
+          <span class="font-serif font-black text-gold text-lg">錦</span>
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-lg md:text-xl tracking-wider text-silk" id="navFarmName">SABAKU NISHIKIGOI</h1>
+          <p class="text-[10px] tracking-widest text-mist uppercase font-semibold">Living Jewels • Blitar Heritage</p>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-mist">
+        <button onclick="switchTab('catalog')" id="btnNavCatalog" class="hover:text-gold transition text-silk font-semibold">Katalog Resmi</button>
+        <button onclick="switchTab('auctions')" id="btnNavAuction" class="hover:text-gold transition">Arena Lelang</button>
+        <button onclick="openCustomerOrdersModal()" class="px-4 py-1.5 rounded-full bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black font-semibold text-xs transition flex items-center gap-1.5">
+          <i class="fa-solid fa-bag-shopping"></i> Pesanan Saya (Ala Shopee)
+        </button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button onclick="openCustomerOrdersModal()" class="md:hidden px-3 py-1.5 rounded-full bg-gold/10 border border-gold/40 text-gold text-xs font-semibold flex items-center gap-1">
+          <i class="fa-solid fa-bag-shopping"></i> Pesanan
+        </button>
+        <a id="navTiktok" href="#" target="_blank" class="w-9 h-9 rounded-full bg-surface border border-borderSubtle flex items-center justify-center text-mist hover:text-white">
+          <i class="fa-brands fa-tiktok text-sm"></i>
+        </a>
+        <a id="navInstagram" href="#" target="_blank" class="w-9 h-9 rounded-full bg-surface border border-borderSubtle flex items-center justify-center text-mist hover:text-pink-400">
+          <i class="fa-brands fa-instagram text-sm"></i>
+        </a>
+        <a id="navWhatsapp" href="#" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 text-xs md:text-sm font-semibold hover:bg-emerald-600 hover:text-white transition">
+          <i class="fa-brands fa-whatsapp text-base"></i>
+          <span class="hidden sm:inline">WhatsApp</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= HERO ================= -->
+  <section class="relative py-14 md:py-20 border-b border-borderSubtle/40">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/30 bg-surface text-gold text-xs font-semibold tracking-widest uppercase mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-crimson animate-ping"></span>
+        Indukan Champion Blitar • Garansi Hidup 100%
+      </div>
+      
+      <h2 class="font-serif text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-silk leading-tight">
+        Seni Hidup Di Atas Air,<br>
+        <span class="gold-gradient-text">Keanggunan Sisik Juara</span>
+      </h2>
+
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <button onclick="switchTab('catalog')" class="px-7 py-3 rounded-xl bg-gold text-black font-bold text-sm hover:brightness-110 transition shadow-lg shadow-gold/10 flex items-center gap-2">
+          <i class="fa-solid fa-store"></i> Beli Ikan Langsung
+        </button>
+        <button onclick="switchTab('auctions')" class="px-7 py-3 rounded-xl bg-gradient-to-r from-crimson to-red-700 text-white font-semibold text-sm hover:brightness-110 transition shadow-lg shadow-crimson/20 flex items-center gap-2">
+          <i class="fa-solid fa-gavel"></i> Arena Lelang
+        </button>
+        <button onclick="openCustomerOrdersModal()" class="px-6 py-3 rounded-xl bg-surface border border-gold/40 text-gold font-semibold text-sm hover:bg-surfaceLight transition flex items-center gap-2">
+          <i class="fa-solid fa-truck-ramp-box"></i> Pantau Pesanan Saya
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+    <div class="flex items-center justify-center gap-3 mb-10">
+      <button id="tabBtnCatalog" onclick="switchTab('catalog')" class="px-6 py-3 rounded-full text-sm font-semibold transition border border-gold bg-gold/10 text-gold shadow-lg shadow-gold/5 flex items-center gap-2">
+        <i class="fa-solid fa-fish-fins"></i> Katalog Beli Langsung
+      </button>
+      <button id="tabBtnAuctions" onclick="switchTab('auctions')" class="px-6 py-3 rounded-full text-sm font-semibold transition border border-borderSubtle bg-surface text-mist hover:text-silk flex items-center gap-2">
+        <i class="fa-solid fa-fire text-crimson"></i> Arena Lelang Resmi
+      </button>
+    </div>
+
+    <!-- CATALOG -->
+    <section id="sectionCatalog">
+      <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </section>
+
+    <!-- AUCTIONS -->
+    <section id="sectionAuctions" class="hidden">
+      <div class="mb-8 flex justify-between items-center p-5 rounded-2xl bg-surface border border-borderSubtle">
+        <div>
+          <h3 class="font-serif text-xl font-bold text-silk">Arena Lelang Live</h3>
+          <p class="text-xs text-mist">Pasang penawaran dengan nomor WhatsApp terverifikasi.</p>
+        </div>
+        <button onclick="openBidderRegisterModal()" class="px-4 py-2 rounded-xl bg-gold/10 border border-gold/40 text-gold text-xs font-bold">Daftar Bidder</button>
+      </div>
+      <div id="auctionGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+  </main>
+
+  <!-- ================= DASHBOARD PEMBELI ALA SHOPEE (PESANAN SAYA) ================= -->
+  <div id="customerOrdersModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-surface border border-gold/30 rounded-2xl max-w-2xl w-full p-6 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('customerOrdersModal')" class="absolute top-4 right-4 text-mist hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+          <i class="fa-solid fa-truck-fast text-lg"></i>
+        </div>
+        <div>
+          <h4 class="font-serif text-xl font-bold text-silk">Pesanan Saya</h4>
+          <p class="text-xs text-mist">Pantau tahapan karantina, packing oksigen, dan perjalanan armada pengantar.</p>
+        </div>
+      </div>
+
+      <!-- Input cari berdasarkan No WA / Order ID -->
+      <div class="p-3 bg-surfaceLight rounded-xl border border-borderSubtle mb-6 flex gap-2">
+        <input type="text" id="custSearchInput" placeholder="Masukkan Nomor WhatsApp atau No. Order (KOI-...)" class="flex-1 px-3 py-2 rounded-lg bg-obsidian border border-borderSubtle text-silk text-xs outline-none focus:border-gold">
+        <button onclick="fetchCustomerOrders()" class="px-4 py-2 rounded-lg bg-gold text-black font-bold text-xs hover:brightness-110">Cari Pesanan</button>
+      </div>
+
+      <!-- Container Pesanan -->
+      <div id="custOrdersList" class="space-y-6"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DETAIL & CHECKOUT LANGSUNG ================= -->
+  <div id="koiDetailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-surface border border-borderSubtle rounded-2xl max-w-xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal('koiDetailModal')" class="absolute top-4 right-4 text-mist hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div id="modalDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL QRIS DINAMIS ================= -->
+  <div id="qrisModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-surface border border-gold/40 rounded-2xl max-w-md w-full p-6 relative text-center">
+      <button onclick="closeModal('qrisModal'); clearInterval(pollInterval);" class="absolute top-4 right-4 text-mist hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h4 class="font-serif text-xl font-bold text-silk">Scan QRIS Casaku</h4>
+      <p class="text-xs text-mist mt-1">Gunakan BCA, Mandiri, Gopay, OVO, Dana, atau ShopeePay.</p>
+      <div class="mt-4 p-4 bg-white rounded-2xl inline-block mx-auto" id="qrcodeCanvas"></div>
+      <div class="mt-4 p-3 rounded-xl bg-surfaceLight border border-borderSubtle text-left text-xs space-y-1">
+        <div class="flex justify-between"><span class="text-mist">No. Pesanan:</span><span class="font-bold text-gold" id="qrisOrderId">-</span></div>
+        <div class="flex justify-between"><span class="text-mist">Total Bayar:</span><span class="font-bold text-silk" id="qrisTotal">-</span></div>
+        <div class="flex justify-between"><span class="text-mist">Status:</span><span class="font-bold text-amber-400" id="qrisStatus">Menunggu Pembayaran...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DUAL-MODE LIVE CHAT (AI BOT + ADMIN CS) ================= -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button onclick="toggleAiChat()" class="w-14 h-14 rounded-full bg-gradient-to-r from-red-700 to-crimson border-2 border-gold text-white flex items-center justify-center shadow-2xl hover:scale-105 transition shadow-crimson/50">
+      <i class="fa-solid fa-headset text-xl"></i>
+    </button>
+
+    <div id="aiChatBox" class="hidden absolute bottom-16 right-0 w-[360px] bg-surface border border-gold/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px]">
+      <!-- Header -->
+      <div class="p-3 bg-surfaceLight border-b border-borderSubtle flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-crimson/30 border border-crimson flex items-center justify-center text-gold text-xs font-serif">錦</div>
+          <div>
+            <h5 class="text-xs font-bold text-silk" id="chatHeaderTitle">Sabaku Live Support</h5>
+            <p class="text-[10px] text-emerald-400" id="chatHeaderSubtitle">● AI Bot + Admin Official Ready</p>
+          </div>
+        </div>
+        <button onclick="toggleAiChat()" class="text-mist hover:text-silk"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Action: Minta Bantuan Admin Asli -->
+      <div class="p-2 bg-obsidian border-b border-borderSubtle flex items-center justify-between text-[11px]">
+        <span class="text-mist">Butuh respon owner langsung?</span>
+        <button onclick="requestAdminHelp()" class="px-2.5 py-1 rounded bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black font-semibold text-[10px] transition">
+          <i class="fa-solid fa-user-shield mr-1"></i> Hubungi Admin Asli
+        </button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-3 text-xs"></div>
+
+      <!-- Input Form -->
+      <form onsubmit="handleSendChat(event)" class="p-3 bg-surfaceLight border-t border-borderSubtle flex gap-2">
+        <input type="text" id="chatInput" placeholder="Ketik pesan Anda..." class="flex-1 px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-silk text-xs outline-none focus:border-gold">
+        <button type="submit" class="px-3 py-2 rounded-xl bg-gold text-black font-bold text-xs"><i class="fa-solid fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    let globalSettings = {};
+    let allKoi = [];
+    let pollInterval = null;
+    let chatSessionId = localStorage.getItem('koi_chat_session') || ('user_' + Math.random().toString(36).substring(2, 10));
+    localStorage.setItem('koi_chat_session', chatSessionId);
+
+    const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+    async function init() {
+      const res = await fetch('/api/settings');
+      globalSettings = await res.json();
+      if (globalSettings.promo_active && globalSettings.promo_text) {
+        document.getElementById('topPromoBar').classList.remove('hidden');
+        document.getElementById('promoText').textContent = globalSettings.promo_text;
+      }
+      loadCatalog();
+      loadAuctions();
+      loadChatHistory();
+      // Polling chat masuk dari admin tiap 4 detik
+      setInterval(loadChatHistory, 4000);
+
+      // Cek apakah ada nomor HP customer yang tersimpan
+      const savedPhone = localStorage.getItem('koi_customer_phone');
+      if (savedPhone) document.getElementById('custSearchInput').value = savedPhone;
+    }
+
+    // Katalog
+    async function loadCatalog() {
+      const res = await fetch('/api/koi');
+      allKoi = await res.json();
+      const container = document.getElementById('catalogGrid');
+      container.innerHTML = allKoi.map(k => `
+        <div class="rounded-2xl bg-surface border border-borderSubtle hover:border-gold/40 transition duration-300 overflow-hidden flex flex-col group">
+          <div class="relative aspect-square overflow-hidden bg-obsidian">
+            <img src="${k.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            ${k.is_sold ? `<div class="absolute inset-0 bg-black/70 flex items-center justify-center"><span class="px-4 py-1.5 rounded-full bg-red-600 text-white font-bold text-xs uppercase">TERJUAL</span></div>` :
+            `<div class="absolute top-3 left-3"><span class="px-2.5 py-1 rounded-md bg-black/60 text-gold text-[11px] font-semibold">${k.variety}</span></div>`}
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <h4 class="font-serif font-bold text-silk text-base group-hover:text-gold transition line-clamp-1">${k.name}</h4>
+              <p class="text-xs text-mist mt-1">${k.size_cm} cm • ${k.gender || 'Unsex'} • ${k.breeder || 'Blitar'}</p>
+            </div>
+            <div class="mt-4 pt-4 border-t border-borderSubtle/60 flex items-center justify-between">
+              <div>
+                <p class="text-[10px] text-mist uppercase font-semibold">Harga</p>
+                <p class="text-base font-bold text-gold">${formatRp(k.price)}</p>
+              </div>
+              <button onclick="openKoiDetail(${k.id})" class="px-4 py-2 rounded-xl bg-gold/10 border border-gold/40 hover:bg-gold hover:text-black text-gold text-xs font-bold transition">Beli Sekarang</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openKoiDetail(id) {
+      const k = allKoi.find(i => i.id === id);
+      if (!k) return;
+      document.getElementById('modalDetailContent').innerHTML = `
+        <div class="space-y-4 text-xs">
+          <div class="aspect-video w-full rounded-xl overflow-hidden bg-black">
+            <img src="${k.image}" class="w-full h-full object-contain">
+          </div>
+          <div>
+            <span class="text-gold font-semibold uppercase">${k.variety}</span>
+            <h3 class="font-serif text-2xl font-bold text-silk mt-0.5">${k.name}</h3>
+            <p class="text-xl font-bold text-gold mt-1">${formatRp(k.price)}</p>
+          </div>
+          ${k.is_sold ? '<div class="p-3 rounded-xl bg-red-900/30 text-center font-bold text-red-300">Ikan Sudah Terjual</div>' : `
+            <form onsubmit="handleDirectCheckout(event, ${k.id})" class="space-y-3 border-t border-borderSubtle pt-3">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="orderCustName" placeholder="Nama Anda" required class="px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+                <input type="tel" id="orderCustPhone" placeholder="No WhatsApp" required class="px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+              </div>
+              <input type="text" id="orderCustCity" placeholder="Kota / Kabupaten Pengiriman" required class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+              <textarea id="orderCustAddress" placeholder="Alamat Pengiriman Lengkap" required rows="2" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold"></textarea>
+              <select id="orderCourier" onchange="updateCheckoutTotal(${k.price})" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+                <option value="Kalog Kereta Api" data-cost="150000">🚆 Kalog / KIB Cepat (1 Malam Se-Jawa) - Rp 150.000</option>
+                <option value="Travel Door-to-Door" data-cost="200000">🚐 Travel Door-to-Door - Rp 200.000</option>
+                <option value="TIKI ONS Karantina" data-cost="180000">📦 TIKI ONS Khusus Hewan Hidup - Rp 180.000</option>
+                <option value="Bus AKAP Bagasi" data-cost="120000">🚌 Bus AKAP Terminal - Rp 120.000</option>
+              </select>
+              <div class="p-3 rounded-xl bg-obsidian border border-borderSubtle flex justify-between items-center">
+                <div>
+                  <span class="text-mist block text-[10px]">Total + Box Oksigen:</span>
+                  <span class="font-bold text-gold text-sm" id="checkoutTotalDisplay">${formatRp(k.price + 150000)}</span>
+                </div>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-crimson to-red-700 text-white font-bold text-xs hover:brightness-110">Bayar QRIS Casaku &rarr;</button>
+              </div>
+            </form>
+          `}
+        </div>
+      `;
+      document.getElementById('koiDetailModal').classList.remove('hidden');
+    }
+
+    function updateCheckoutTotal(base) {
+      const select = document.getElementById('orderCourier');
+      const shipCost = parseInt(select.options[select.selectedIndex].getAttribute('data-cost')) || 0;
+      document.getElementById('checkoutTotalDisplay').textContent = formatRp(base + shipCost);
+    }
+
+    async function handleDirectCheckout(e, koiId) {
+      e.preventDefault();
+      const select = document.getElementById('orderCourier');
+      const phone = document.getElementById('orderCustPhone').value;
+      localStorage.setItem('koi_customer_phone', phone);
+
+      const payload = {
+        koi_id: koiId,
+        customer_name: document.getElementById('orderCustName').value,
+        customer_phone: phone,
+        customer_city: document.getElementById('orderCustCity').value,
+        customer_address: document.getElementById('orderCustAddress').value,
+        shipping_courier: select.value,
+        shipping_cost: parseInt(select.options[select.selectedIndex].getAttribute('data-cost')) || 0
+      };
+
+      const res = await fetch('/api/orders/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal('koiDetailModal');
+        openQrisModal(data);
+      } else {
+        alert(data.message);
+      }
+    }
+
+    function openQrisModal(order) {
+      document.getElementById('qrisOrderId').textContent = order.order_id;
+      document.getElementById('qrisTotal').textContent = formatRp(order.total_amount);
+      const canvasContainer = document.getElementById('qrcodeCanvas');
+      canvasContainer.innerHTML = '';
+      new QRCode(canvasContainer, { text: order.qris_string || order.order_id, width: 180, height: 180 });
+      document.getElementById('qrisModal').classList.remove('hidden');
+
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        const chk = await fetch(`/api/orders/check-status/${order.order_id}`);
+        const d = await chk.json();
+        if (d.success && d.order.payment_status === 'PAID') {
+          clearInterval(pollInterval);
+          document.getElementById('qrisStatus').textContent = 'LUNAS (TERVERIFIKASI)!';
+          document.getElementById('qrisStatus').className = 'font-bold text-emerald-400 text-sm';
+          alert('Pembayaran Berhasil! Pesanan Anda telah masuk proses karantina.');
+          loadCatalog();
+        }
+      }, 3000);
+    }
+
+    // ==================== DASHBOARD PEMBELI (PESANAN SAYA ALA SHOPEE) ====================
+    function openCustomerOrdersModal() {
+      document.getElementById('customerOrdersModal').classList.remove('hidden');
+      const savedPhone = localStorage.getItem('koi_customer_phone');
+      if (savedPhone) {
+        document.getElementById('custSearchInput').value = savedPhone;
+        fetchCustomerOrders();
+      }
+    }
+
+    async function fetchCustomerOrders() {
+      const q = document.getElementById('custSearchInput').value.trim();
+      if (!q) return;
+      const container = document.getElementById('custOrdersList');
+      container.innerHTML = '<p class="text-xs text-mist text-center py-6">Memuat rincian pesanan Anda...</p>';
+
+      try {
+        let orders = [];
+        if (q.startsWith('KOI-')) {
+          const res = await fetch(`/api/orders/${q}/details`);
+          const d = await res.json();
+          if (d.success) orders = [d.order];
+        } else {
+          const res = await fetch(`/api/customer/orders?phone=${encodeURIComponent(q)}`);
+          const d = await res.json();
+          if (d.success) orders = d.orders;
+        }
+
+        if (orders.length === 0) {
+          container.innerHTML = '<div class="p-6 rounded-xl bg-surfaceLight text-center text-xs text-mist">Belum ada riwayat pesanan dengan nomor tersebut.</div>';
+          return;
+        }
+
+        // Render setiap pesanan dengan Shopee Stepper & Timeline
+        let html = '';
+        for (const o of orders) {
+          // Ambil detail timeline checkpoint manual dari admin
+          const resTimeline = await fetch(`/api/orders/${o.order_id}/details`);
+          const detailData = await resTimeline.json();
+          const timeline = detailData.timeline || [];
+
+          // Hitung index step aktif (0-5)
+          let step = 1;
+          if (o.payment_status === 'PAID') step = 2;
+          if (o.shipping_status === 'QUARANTINE') step = 3;
+          if (o.shipping_status === 'PACKING') step = 4;
+          if (o.shipping_status === 'SHIPPED') step = 5;
+          if (o.shipping_status === 'DELIVERED') step = 6;
+
+          html += `
+            <div class="p-5 rounded-2xl bg-surfaceLight border border-gold/30 space-y-4">
+              <!-- Header Pesanan -->
+              <div class="flex justify-between items-start border-b border-borderSubtle pb-3">
+                <div>
+                  <span class="text-[10px] font-mono text-gold px-2 py-0.5 rounded bg-black/60">${o.order_id}</span>
+                  <h5 class="font-serif font-bold text-silk text-base mt-1">${o.koi_name}</h5>
+                  <p class="text-[11px] text-mist">${o.shipping_courier} • Tujuan: ${o.customer_city}</p>
+                </div>
+                <div class="text-right">
+                  <span class="px-2.5 py-1 rounded text-[10px] font-bold ${o.payment_status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${o.payment_status}</span>
+                  <p class="font-bold text-gold text-sm mt-1">${formatRp(o.total_amount)}</p>
+                </div>
+              </div>
+
+              <!-- Shopee-Style Horizontal Step Bar -->
+              <div class="pt-2">
+                <p class="text-[11px] text-mist font-semibold uppercase mb-3">Status Pengiriman Ikan:</p>
+                <div class="grid grid-cols-5 text-center text-[10px] gap-1 relative">
+                  <div class="${step >= 1 ? 'text-gold font-bold' : 'text-zinc-600'}">
+                    <div class="w-7 h-7 mx-auto rounded-full flex items-center justify-center mb-1 ${step >= 1 ? 'bg-gold text-black' : 'bg-zinc-800 text-mist'}"><i class="fa-solid fa-receipt"></i></div>
+                    Pesanan Dibuat
+                  </div>
+                  <div class="${step >= 2 ? 'text-gold font-bold' : 'text-zinc-600'}">
+                    <div class="w-7 h-7 mx-auto rounded-full flex items-center justify-center mb-1 ${step >= 2 ? 'bg-gold text-black' : 'bg-zinc-800 text-mist'}"><i class="fa-solid fa-wallet"></i></div>
+                    Lunas
+                  </div>
+                  <div class="${step >= 3 ? 'text-gold font-bold' : 'text-zinc-600'}">
+                    <div class="w-7 h-7 mx-auto rounded-full flex items-center justify-center mb-1 ${step >= 3 ? 'bg-gold text-black' : 'bg-zinc-800 text-mist'}"><i class="fa-solid fa-fish"></i></div>
+                    Karantina & Puasa
+                  </div>
+                  <div class="${step >= 5 ? 'text-gold font-bold' : 'text-zinc-600'}">
+                    <div class="w-7 h-7 mx-auto rounded-full flex items-center justify-center mb-1 ${step >= 5 ? 'bg-gold text-black' : 'bg-zinc-800 text-mist'}"><i class="fa-solid fa-truck"></i></div>
+                    Dalam Perjalanan
+                  </div>
+                  <div class="${step >= 6 ? 'text-gold font-bold' : 'text-zinc-600'}">
+                    <div class="w-7 h-7 mx-auto rounded-full flex items-center justify-center mb-1 ${step >= 6 ? 'bg-emerald-500 text-black' : 'bg-zinc-800 text-mist'}"><i class="fa-solid fa-check"></i></div>
+                    Tiba di Kolam
+                  </div>
+                </div>
+              </div>
+
+              <!-- Posisi Diantar Sampai Mana (Update Manual Admin) -->
+              <div class="mt-4 p-4 rounded-xl bg-obsidian border border-borderSubtle">
+                <p class="text-xs font-bold text-silk flex items-center gap-2 mb-3">
+                  <i class="fa-solid fa-location-crosshairs text-crimson"></i> Posisi & Riwayat Pengiriman:
+                </p>
+
+                ${timeline.length === 0 ? '<p class="text-xs text-mist italic">Belum ada catatan perjalanan.</p>' : `
+                  <div class="space-y-3 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-borderSubtle">
+                    ${timeline.map(t => `
+                      <div class="flex items-start gap-3 relative pl-6 text-xs">
+                        <span class="absolute left-1 top-1.5 w-2.5 h-2.5 rounded-full bg-gold"></span>
+                        <div class="flex-1">
+                          <p class="font-bold text-silk">${t.title} <span class="text-[10px] text-mist font-normal">(${t.location || 'Blitar'})</span></p>
+                          <p class="text-mist text-[11px] mt-0.5">${t.description}</p>
+                          <span class="text-[10px] text-zinc-500 font-mono">${new Date(t.created_at).toLocaleString('id-ID')}</span>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                `}
+
+                ${o.tracking_number ? `
+                  <div class="mt-4 pt-3 border-t border-borderSubtle/60 flex justify-between items-center text-xs">
+                    <span class="text-mist">Resi / Info Armada: <strong class="text-gold font-mono">${o.tracking_number}</strong></span>
+                    ${o.shipping_courier.includes('TIKI') ? `<a href="https://www.tiki.id/id/tracking" target="_blank" class="text-emerald-400 underline font-semibold text-[11px]">Cek di Web TIKI &rarr;</a>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = '<p class="text-xs text-red-400 text-center">Gagal memuat pesanan.</p>';
+      }
+    }
+
+    // ==================== DUAL-MODE LIVE CHAT ====================
+    function toggleAiChat() {
+      document.getElementById('aiChatBox').classList.toggle('hidden');
+    }
+
+    async function loadChatHistory() {
+      try {
+        const res = await fetch(`/api/chat/history/${chatSessionId}`);
+        const data = await res.json();
+        const container = document.getElementById('chatMessages');
+        if (!data.messages || data.messages.length === 0) {
+          container.innerHTML = `
+            <div class="p-3 rounded-xl bg-surfaceLight border border-borderSubtle text-silk leading-relaxed">
+              Halo! Saya Asisten AI Sabaku Nishikigoi. Ada yang bisa dibantu mengenai pilihan ikan koi, lelang, atau packing pengiriman bergaransi hidup?
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = data.messages.map(m => {
+          if (m.sender_type === 'user') {
+            return `<div class="p-2.5 rounded-xl bg-gold/20 text-silk ml-auto max-w-[80%]">${m.message}</div>`;
+          } else if (m.sender_type === 'admin') {
+            return `
+              <div class="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-silk max-w-[85%]">
+                <span class="inline-block px-1.5 py-0.5 rounded bg-emerald-500 text-black font-bold text-[9px] mb-1">CS ADMIN SABAKU</span>
+                <p>${m.message}</p>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="p-2.5 rounded-xl bg-surfaceLight border border-borderSubtle text-silk max-w-[85%]">
+                <span class="text-[9px] text-mist block mb-0.5">KoiSensei Bot</span>
+                <p>${m.message}</p>
+              </div>
+            `;
+          }
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+      } catch (e) {}
+    }
+
+    async function handleSendChat(e) {
+      e.preventDefault();
+      const inp = document.getElementById('chatInput');
+      const text = inp.value.trim();
+      if (!text) return;
+
+      inp.value = '';
+      await fetch('/api/chat/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: chatSessionId,
+          message: text
+        })
+      });
+      loadChatHistory();
+    }
+
+    async function requestAdminHelp() {
+      await fetch('/api/chat/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: chatSessionId,
+          message: 'Halo, saya ingin berkonsultasi langsung dengan Admin Sabaku.',
+          request_admin: true
+        })
+      });
+      document.getElementById('chatHeaderSubtitle').textContent = '● Menghubungkan ke Admin CS...';
+      document.getElementById('chatHeaderSubtitle').className = 'text-[10px] text-amber-400';
+      loadChatHistory();
+    }
+
+    // Auctions
+    async function loadAuctions() {
+      const res = await fetch('/api/auctions');
+      const list = await res.json();
+      const c = document.getElementById('auctionGrid');
+      if (list.length === 0) { c.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-mist">Belum ada lelang aktif.</div>'; return; }
+      c.innerHTML = list.map(a => `
+        <div class="rounded-2xl bg-surface border border-gold/30 p-4">
+          <img src="${a.image}" class="aspect-video w-full object-cover rounded-xl mb-3">
+          <h4 class="font-serif font-bold text-silk">${a.koi_name}</h4>
+          <p class="text-xs text-gold font-bold mt-1">Current Bid: ${formatRp(a.current_bid)}</p>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(t) {
+      const c = document.getElementById('sectionCatalog');
+      const a = document.getElementById('sectionAuctions');
+      const bc = document.getElementById('tabBtnCatalog');
+      const ba = document.getElementById('tabBtnAuctions');
+      if (t === 'catalog') {
+        c.classList.remove('hidden'); a.classList.add('hidden');
+        bc.className = 'px-6 py-3 rounded-full text-sm font-semibold transition border border-gold bg-gold/10 text-gold shadow-lg shadow-gold/5 flex items-center gap-2';
+        ba.className = 'px-6 py-3 rounded-full text-sm font-semibold transition border border-borderSubtle bg-surface text-mist hover:text-silk flex items-center gap-2';
+      } else {
+        c.classList.add('hidden'); a.classList.remove('hidden');
+        ba.className = 'px-6 py-3 rounded-full text-sm font-semibold transition border border-gold bg-gold/10 text-gold shadow-lg shadow-gold/5 flex items-center gap-2';
+        bc.className = 'px-6 py-3 rounded-full text-sm font-semibold transition border border-borderSubtle bg-surface text-mist hover:text-silk flex items-center gap-2';
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

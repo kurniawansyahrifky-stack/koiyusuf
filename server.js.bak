@@ -1,0 +1,387 @@
+const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const multer = require('multer');
+
+const app = express();
+const PORT = 5060;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Upload Foto
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'public', 'uploads'));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname) || '.jpg';
+    cb(null, 'koi-' + Date.now() + '-' + Math.round(Math.random() * 1e6) + ext);
+  }
+});
+const upload = multer({ storage: storage, limits: { fileSize: 30 * 1024 * 1024 } });
+
+// Database
+const db = new sqlite3.Database('./koi_database.sqlite');
+
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS bidders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone TEXT UNIQUE NOT NULL,
+    address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    deposit_status TEXT DEFAULT 'PENDING',
+    deposit_amount INTEGER DEFAULT 50000,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS auctions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT DEFAULT 'A',
+    koi_name TEXT NOT NULL,
+    variety TEXT NOT NULL,
+    size_cm INTEGER NOT NULL,
+    gender TEXT DEFAULT 'Female',
+    breeder TEXT DEFAULT 'Blitar Super',
+    open_bid INTEGER NOT NULL,
+    bid_step INTEGER DEFAULT 50000,
+    current_bid INTEGER NOT NULL,
+    highest_bidder TEXT DEFAULT 'Belum Ada',
+    highest_city TEXT DEFAULT '-',
+    highest_wa TEXT DEFAULT '-',
+    end_time TEXT NOT NULL,
+    image TEXT NOT NULL,
+    is_closed INTEGER DEFAULT 0
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS bid_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    auction_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    city TEXT NOT NULL,
+    wa TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS koi_products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    variety TEXT NOT NULL,
+    size_cm INTEGER NOT NULL,
+    gender TEXT DEFAULT 'Unsex',
+    breeder TEXT DEFAULT 'Lokal Blitar',
+    price INTEGER NOT NULL,
+    image TEXT NOT NULL,
+    desc TEXT,
+    is_sold INTEGER DEFAULT 0
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS articles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    content TEXT NOT NULL
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    customer_phone TEXT,
+    rating INTEGER DEFAULT 5,
+    comment TEXT NOT NULL,
+    variety_bought TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS store_settings (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    farm_name TEXT DEFAULT 'Sabaku Nishikigoi Farm',
+    tagline TEXT DEFAULT 'Koleksi Ikan Koi Berkualitas Juara & Berkarakter',
+    wa_number TEXT DEFAULT '6281219623569',
+    tiktok_url TEXT DEFAULT 'https://tiktok.com',
+    ig_url TEXT DEFAULT 'https://instagram.com',
+    deposit_fee INTEGER DEFAULT 50000
+  )`);
+
+  db.run("INSERT OR IGNORE INTO store_settings (id) VALUES (1)");
+});
+
+// API PESERTA LELANG & DEPOSIT
+app.post('/api/bidders/register', (req, res) => {
+  const { name, phone, address, city } = req.body;
+  if (!name || !phone || !address || !city) {
+    return res.status(400).json({ error: "Semua kolom wajib diisi!" });
+  }
+  const cleanPhone = phone.replace(/\D/g, '');
+  db.run(
+    `INSERT INTO bidders (name, phone, address, city, deposit_status, deposit_amount) 
+     VALUES (?, ?, ?, ?, 'PENDING', 50000)
+     ON CONFLICT(phone) DO UPDATE SET name = excluded.name, address = excluded.address, city = excluded.city`,
+    [name, cleanPhone, address, city],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    }
+  );
+});
+
+app.get('/api/bidders/check/:phone', (req, res) => {
+  const cleanPhone = req.params.phone.replace(/\D/g, '');
+  db.get("SELECT * FROM bidders WHERE phone = ?", [cleanPhone], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(row || { deposit_status: 'UNREGISTERED' });
+  });
+});
+
+app.get('/api/bidders', (req, res) => {
+  db.all("SELECT * FROM bidders ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/bidders/status/:id', (req, res) => {
+  db.run("UPDATE bidders SET deposit_status = ? WHERE id = ?", [req.body.status, req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// API BID
+app.post('/api/auctions/bid', (req, res) => {
+  const { auction_id, wa, amount } = req.body;
+  const cleanPhone = (wa || '').replace(/\D/g, '');
+  const bidAmount = parseInt(amount);
+
+  db.get("SELECT * FROM bidders WHERE phone = ?", [cleanPhone], (err, bidder) => {
+    if (err || !bidder) {
+      return res.status(403).json({ error: "Nomor Anda belum terdaftar! Silakan daftar peserta lelang terlebih dahulu." });
+    }
+    if (bidder.deposit_status !== 'VERIFIED') {
+      return res.status(403).json({ error: "Deposit Rp 50.000 Anda belum di-ACC Admin! Silakan konfirmasi transfer via WhatsApp." });
+    }
+
+    db.get("SELECT * FROM auctions WHERE id = ?", [auction_id], (err2, item) => {
+      if (err2 || !item) return res.status(404).json({ error: "Item lelang tidak ditemukan!" });
+      if (item.is_closed || new Date(item.end_time) <= new Date()) {
+        return res.status(400).json({ error: "Lelang sudah selesai!" });
+      }
+
+      const minValid = item.current_bid + item.bid_step;
+      if (bidAmount < minValid) {
+        return res.status(400).json({ error: `Tawaran minimal adalah Rp ${minValid.toLocaleString('id-ID')}` });
+      }
+
+      let newEndTime = item.end_time;
+      if ((new Date(item.end_time) - new Date()) < 5 * 60 * 1000) {
+        newEndTime = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+      }
+
+      db.run(
+        "INSERT INTO bid_history (auction_id, name, city, wa, amount) VALUES (?, ?, ?, ?, ?)",
+        [auction_id, bidder.name, bidder.city, cleanPhone, bidAmount],
+        function (err3) {
+          if (err3) return res.status(500).json({ error: err3.message });
+
+          db.run(
+            "UPDATE auctions SET current_bid = ?, highest_bidder = ?, highest_city = ?, highest_wa = ?, end_time = ? WHERE id = ?",
+            [bidAmount, bidder.name, bidder.city, cleanPhone, newEndTime, auction_id],
+            function (err4) {
+              if (err4) return res.status(500).json({ error: err4.message });
+              res.json({ success: true, current_bid: bidAmount });
+            }
+          );
+        }
+      );
+    });
+  });
+});
+
+// API KATALOG KOI
+app.get('/api/koi', (req, res) => {
+  db.all("SELECT * FROM koi_products ORDER BY is_sold ASC, id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/koi', upload.single('imageFile'), (req, res) => {
+  const { name, variety, size_cm, gender, breeder, price, desc } = req.body;
+  const img = req.file ? `/uploads/${req.file.filename}` : '/uploads/hero-koi-1.jpg';
+  db.run(
+    "INSERT INTO koi_products (name, variety, size_cm, gender, breeder, price, image, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [name, variety, parseInt(size_cm) || 20, gender, breeder, parseInt(price) || 0, img, desc],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, id: this.lastID });
+    }
+  );
+});
+
+// ROUTE EDIT / UPDATE KOI
+app.put('/api/koi/:id', upload.single('imageFile'), (req, res) => {
+  const { name, variety, size_cm, gender, breeder, price, desc } = req.body;
+  const id = req.params.id;
+
+  if (req.file) {
+    const img = `/uploads/${req.file.filename}`;
+    db.run(
+      "UPDATE koi_products SET name = ?, variety = ?, size_cm = ?, gender = ?, breeder = ?, price = ?, desc = ?, image = ? WHERE id = ?",
+      [name, variety, parseInt(size_cm) || 20, gender, breeder, parseInt(price) || 0, desc, img, id],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true });
+      }
+    );
+  } else {
+    db.run(
+      "UPDATE koi_products SET name = ?, variety = ?, size_cm = ?, gender = ?, breeder = ?, price = ?, desc = ? WHERE id = ?",
+      [name, variety, parseInt(size_cm) || 20, gender, breeder, parseInt(price) || 0, desc, id],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true });
+      }
+    );
+  }
+});
+
+app.post('/api/koi/toggle-sold/:id', (req, res) => {
+  db.run("UPDATE koi_products SET is_sold = CASE WHEN is_sold = 1 THEN 0 ELSE 1 END WHERE id = ?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+app.delete('/api/koi/:id', (req, res) => {
+  db.run("DELETE FROM koi_products WHERE id = ?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// API LELANG
+app.get('/api/auctions', (req, res) => {
+  db.all("SELECT * FROM auctions ORDER BY is_closed ASC, id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.get('/api/auctions/:id/bids', (req, res) => {
+  db.all("SELECT * FROM bid_history WHERE auction_id = ? ORDER BY id DESC LIMIT 15", [req.params.id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/auctions', upload.single('imageFile'), (req, res) => {
+  const { code, koi_name, variety, size_cm, gender, breeder, open_bid, bid_step, end_time } = req.body;
+  const img = req.file ? `/uploads/${req.file.filename}` : '/uploads/hero-koi-1.jpg';
+  const ob = parseInt(open_bid) || 1000000;
+  db.run(
+    "INSERT INTO auctions (code, koi_name, variety, size_cm, gender, breeder, open_bid, bid_step, current_bid, end_time, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [code || 'A', koi_name, variety, parseInt(size_cm) || 30, gender, breeder, ob, parseInt(bid_step) || 50000, ob, end_time, img],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, id: this.lastID });
+    }
+  );
+});
+
+app.post('/api/auctions/toggle/:id', (req, res) => {
+  db.run("UPDATE auctions SET is_closed = CASE WHEN is_closed = 1 THEN 0 ELSE 1 END WHERE id = ?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+app.delete('/api/auctions/:id', (req, res) => {
+  db.run("DELETE FROM auctions WHERE id = ?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// API ARTIKEL
+app.get('/api/articles', (req, res) => {
+  db.all("SELECT * FROM articles ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/articles', (req, res) => {
+  db.run(
+    "INSERT INTO articles (title, category, content) VALUES (?, ?, ?)",
+    [req.body.title, req.body.category, req.body.content],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, id: this.lastID });
+    }
+  );
+});
+
+app.delete('/api/articles/:id', (req, res) => {
+  db.run("DELETE FROM articles WHERE id = ?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// API REVIEWS
+app.get('/api/reviews', (req, res) => {
+  db.all("SELECT * FROM reviews ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/reviews', (req, res) => {
+  const { customer_name, customer_phone, rating, comment, variety_bought } = req.body;
+  const cleanPhone = (customer_phone || '').replace(/\D/g, '');
+  db.get("SELECT * FROM bidders WHERE phone = ?", [cleanPhone], (err, row) => {
+    if (err || !row) {
+      return res.status(403).json({ error: "Ulasan hanya bisa dikirim oleh pembeli yang nomor WA-nya terdaftar di sistem!" });
+    }
+    db.run(
+      "INSERT INTO reviews (customer_name, customer_phone, rating, comment, variety_bought) VALUES (?, ?, ?, ?, ?)",
+      [customer_name, cleanPhone, parseInt(rating) || 5, comment, variety_bought || 'Nishikigoi'],
+      function (err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        res.json({ success: true });
+      }
+    );
+  });
+});
+
+// API SETTINGS
+app.get('/api/settings', (req, res) => {
+  db.get("SELECT * FROM store_settings WHERE id = 1", (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(row || {});
+  });
+});
+
+app.post('/api/settings', (req, res) => {
+  const { farm_name, tagline, wa_number, tiktok_url, ig_url } = req.body;
+  db.run(
+    "UPDATE store_settings SET farm_name = ?, tagline = ?, wa_number = ?, tiktok_url = ?, ig_url = ? WHERE id = 1",
+    [farm_name, tagline, wa_number, tiktok_url, ig_url],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    }
+  );
+});
+
+// PORTAL ADMIN
+app.get('/admin-portal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});

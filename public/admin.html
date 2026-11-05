@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Sabaku Nishikigoi Luxury</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0B0F14',
+            surface: '#131B26',
+            surfaceLight: '#1B2636',
+            borderSubtle: '#223247',
+            gold: '#D4AF37',
+            crimson: '#E63946',
+            silk: '#F1F5F9',
+            mist: '#94A3B8'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0B0F14; color: #F1F5F9; font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ================= LOGIN ================= -->
+  <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian">
+    <div class="bg-surface border border-gold/30 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+      <div class="w-14 h-14 rounded-full border border-gold/40 flex items-center justify-center bg-surfaceLight mx-auto mb-4">
+        <span class="font-serif font-black text-gold text-2xl">錦</span>
+      </div>
+      <h3 class="font-serif text-xl font-bold text-silk">Admin Portal Login</h3>
+      <p class="text-xs text-mist mt-1 mb-6">Sabaku Nishikigoi Heritage</p>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <input type="password" id="adminPassInput" placeholder="Password Admin" required class="w-full px-4 py-2.5 rounded-xl bg-surfaceLight border border-borderSubtle text-silk text-sm outline-none focus:border-gold text-center">
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gold text-black font-bold text-xs hover:brightness-110">Masuk</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= APP ================= -->
+  <div id="adminApp" class="hidden flex-1 flex flex-col">
+    <header class="h-16 bg-surface border-b border-borderSubtle px-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="font-serif font-bold text-gold text-lg">錦 SABAKU MANAGEMENT</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/" target="_blank" class="text-xs text-mist hover:text-silk"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Website</a>
+        <button onclick="logout()" class="px-3 py-1.5 rounded-lg bg-surfaceLight text-mist hover:text-red-400 text-xs border border-borderSubtle">Keluar</button>
+      </div>
+    </header>
+
+    <!-- Nav Tabs -->
+    <div class="bg-surfaceLight border-b border-borderSubtle px-6 flex gap-4 overflow-x-auto text-xs font-semibold">
+      <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="py-3 text-gold border-b-2 border-gold flex items-center gap-2">
+        <i class="fa-solid fa-boxes-packing"></i> Pesanan & Tracking Shopee
+      </button>
+      <button onclick="switchAdminTab('chats')" id="tabBtnChats" class="py-3 text-mist hover:text-silk flex items-center gap-2">
+        <i class="fa-solid fa-comments"></i> Live Chat Masuk (CS)
+      </button>
+      <button onclick="switchAdminTab('settings')" id="tabBtnSettings" class="py-3 text-mist hover:text-silk flex items-center gap-2">
+        <i class="fa-solid fa-sliders"></i> Toko, Promo & Casaku
+      </button>
+      <button onclick="switchAdminTab('koi')" id="tabBtnKoi" class="py-3 text-mist hover:text-silk flex items-center gap-2">
+        <i class="fa-solid fa-fish"></i> Katalog Ikan
+      </button>
+    </div>
+
+    <!-- Container -->
+    <div class="p-6 max-w-7xl mx-auto w-full flex-1">
+      
+      <!-- TAB 1: ORDERS & TRACKING CHECKPOINTS -->
+      <div id="tabContentOrders">
+        <div class="flex justify-between items-center mb-6">
+          <h4 class="font-serif text-lg font-bold text-silk">Manajemen Pesanan & Timeline Perjalanan</h4>
+          <button onclick="loadAdminOrders()" class="px-3 py-1.5 rounded-xl bg-surface border border-borderSubtle text-xs text-mist hover:text-silk"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh</button>
+        </div>
+        <div class="bg-surface border border-borderSubtle rounded-2xl overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-surfaceLight border-b border-borderSubtle text-mist uppercase font-semibold">
+              <tr>
+                <th class="p-3">Order ID</th>
+                <th class="p-3">Ikan</th>
+                <th class="p-3">Pembeli & Tujuan</th>
+                <th class="p-3">Bayar</th>
+                <th class="p-3">Status Pengiriman</th>
+                <th class="p-3">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-borderSubtle"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: LIVE CHAT MASUK (CS OPERATOR) -->
+      <div id="tabContentChats" class="hidden">
+        <h4 class="font-serif text-lg font-bold text-silk mb-4">Live Chat Pelanggan (CS Operator)</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-[550px] bg-surface border border-borderSubtle rounded-2xl overflow-hidden">
+          <!-- Sidebar Daftar Pengunjung -->
+          <div class="border-r border-borderSubtle overflow-y-auto" id="chatSessionList"></div>
+
+          <!-- Chat Window Feed -->
+          <div class="col-span-2 flex flex-col bg-obsidian">
+            <div class="p-3 bg-surfaceLight border-b border-borderSubtle flex justify-between items-center text-xs">
+              <span class="font-bold text-silk" id="activeChatTarget">Pilih salah satu obrolan</span>
+              <button onclick="loadAdminChats()" class="text-mist hover:text-silk"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="flex-1 p-4 overflow-y-auto space-y-3 text-xs" id="adminChatFeed">
+              <p class="text-mist text-center mt-12">Pilih obrolan pengunjung di sebelah kiri untuk mulai membalas.</p>
+            </div>
+            <!-- Reply Form -->
+            <form onsubmit="handleAdminSendReply(event)" class="p-3 bg-surfaceLight border-t border-borderSubtle flex gap-2">
+              <input type="text" id="adminReplyInput" placeholder="Ketik balasan resmi dari admin..." class="flex-1 px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-silk text-xs outline-none focus:border-gold">
+              <button type="submit" class="px-4 py-2 rounded-xl bg-gold text-black font-bold text-xs">Kirim</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: SETTINGS & CASAKU -->
+      <div id="tabContentSettings" class="hidden max-w-2xl bg-surface border border-borderSubtle rounded-2xl p-6">
+        <h4 class="font-serif text-lg font-bold text-silk mb-4">Pengaturan Toko, Promo & Casaku</h4>
+        <form onsubmit="handleSaveSettings(event)" class="space-y-4 text-xs">
+          <div><label class="block text-mist mb-1">Nama Farm</label><input type="text" id="setFarmName" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none"></div>
+          <div><label class="block text-mist mb-1">WhatsApp Farm (62xxx)</label><input type="text" id="setWa" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none"></div>
+          <div class="border-t border-borderSubtle pt-3">
+            <label class="block text-gold font-bold mb-1">Top Promo Announcement Bar</label>
+            <div class="flex items-center gap-2 mb-2"><input type="checkbox" id="setPromoActive"><span class="text-silk">Tampilkan Banner Promo di Atas</span></div>
+            <textarea id="setPromoText" rows="2" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none mb-2"></textarea>
+          </div>
+          <div class="border-t border-borderSubtle pt-3">
+            <label class="block text-gold font-bold mb-1">Casaku Payment Gateway</label>
+            <input type="text" id="setCasakuLicense" placeholder="Casaku License Key" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none mb-2">
+            <input type="text" id="setCasakuQrId" placeholder="Casaku QR ID" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none">
+          </div>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-gold text-black font-bold text-xs">Simpan Pengaturan</button>
+        </form>
+      </div>
+
+      <!-- TAB 4: KOI -->
+      <div id="tabContentKoi" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+          <h4 class="font-serif text-lg font-bold text-silk">Katalog Ikan</h4>
+          <button onclick="openAddKoiModal()" class="px-4 py-2 rounded-xl bg-gold text-black font-bold text-xs">+ Tambah Ikan</button>
+        </div>
+        <div id="adminKoiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH CHECKPOINT POSISI (DIANTAR SAMPAI MANA) ================= -->
+  <div id="modalAddCheckpoint" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-surface border border-gold/40 rounded-2xl max-w-md w-full p-6 relative text-xs">
+      <button onclick="closeAdminModal('modalAddCheckpoint')" class="absolute top-4 right-4 text-mist hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h4 class="font-serif text-base font-bold text-silk mb-1">Update Posisi / Perjalanan Pesanan</h4>
+      <p class="text-mist mb-3">Pesanan: <span id="cpOrderIdDisplay" class="text-gold font-mono font-bold"></span></p>
+
+      <form onsubmit="handleSaveCheckpoint(event)" class="space-y-3">
+        <input type="hidden" id="cpOrderId">
+        <div>
+          <label class="block text-mist mb-1">Tahapan Status (Shopee Step)</label>
+          <select id="cpStage" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none">
+            <option value="QUARANTINE">Proses Karantina & Puasa Ikan</option>
+            <option value="PACKING">Proses Packing Oksigen Murni & Box Blitar</option>
+            <option value="SHIPPED">Dalam Pengiriman (Armada Berangkat)</option>
+            <option value="DELIVERED">Ikan Telah Sampai di Kolam Pembeli</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-mist mb-1">Judul Checkpoint (Status Diantar)</label>
+          <input type="text" id="cpTitle" placeholder="Contoh: Paket Diserahkan ke Supir Travel / Transit di Surabaya" required class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+        </div>
+        <div>
+          <label class="block text-mist mb-1">Posisi / Lokasi Saat Ini</label>
+          <input type="text" id="cpLocation" placeholder="Contoh: Tol Kertosono / Rest Area KM 626" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+        </div>
+        <div>
+          <label class="block text-mist mb-1">Keterangan / Detail Armada (Kontak Supir, Plat No, dsb)</label>
+          <textarea id="cpDesc" rows="2" placeholder="Contoh: Dibawa oleh Supir Bpk. Bambang Plat AG 7821 U, estimasi tiba subuh." required class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold"></textarea>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gold text-black font-bold text-xs hover:brightness-110">Simpan Update Checkpoint</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH IKAN ================= -->
+  <div id="modalAddKoi" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-surface border border-borderSubtle rounded-2xl max-w-md w-full p-6 relative text-xs">
+      <button onclick="closeAdminModal('modalAddKoi')" class="absolute top-4 right-4 text-mist hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      <h4 class="font-serif text-base font-bold text-silk mb-3">Tambah Ikan Baru</h4>
+      <form onsubmit="handleSaveKoi(event)" class="space-y-3">
+        <input type="text" id="koiName" placeholder="Nama Ikan" required class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+        <input type="text" id="koiVariety" placeholder="Varietas (Kohaku, Showa, etc)" required class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" id="koiSize" placeholder="Ukuran (cm)" required class="px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+          <input type="number" id="koiPrice" placeholder="Harga (Rp)" required class="px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-silk outline-none focus:border-gold">
+        </div>
+        <div>
+          <label class="block text-mist mb-1">Foto Ikan</label>
+          <input type="file" id="koiImageFile" accept="image/*" class="w-full px-3 py-2 rounded-xl bg-surfaceLight border border-borderSubtle text-mist outline-none">
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gold text-black font-bold text-xs">Simpan Ikan</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let adminToken = localStorage.getItem('koi_admin_token');
+    let currentSelectedChatSession = null;
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById('adminPassInput').value;
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      const data = await res.json();
+      if (data.success) {
+        adminToken = data.token;
+        localStorage.setItem('koi_admin_token', adminToken);
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('adminApp').classList.remove('hidden');
+        loadAdminOrders();
+      } else {
+        alert(data.message);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('koi_admin_token');
+      location.reload();
+    }
+
+    function switchAdminTab(t) {
+      ['Orders', 'Chats', 'Settings', 'Koi'].forEach(tab => {
+        document.getElementById(`tabContent${tab}`).classList.add('hidden');
+        document.getElementById(`tabBtn${tab}`).className = 'py-3 text-mist hover:text-silk flex items-center gap-2';
+      });
+      const cap = t.charAt(0).toUpperCase() + t.slice(1);
+      document.getElementById(`tabContent${cap}`).classList.remove('hidden');
+      document.getElementById(`tabBtn${cap}`).className = 'py-3 text-gold border-b-2 border-gold flex items-center gap-2';
+
+      if (t === 'orders') loadAdminOrders();
+      if (t === 'chats') loadAdminChats();
+      if (t === 'settings') loadAdminSettings();
+      if (t === 'koi') loadAdminKoi();
+    }
+
+    // Orders
+    async function loadAdminOrders() {
+      const res = await fetch('/api/admin/orders', { headers: { 'x-admin-token': adminToken } });
+      const orders = await res.json();
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = orders.map(o => `
+        <tr class="hover:bg-surfaceLight/50">
+          <td class="p-3 font-mono font-bold text-gold">${o.order_id}</td>
+          <td class="p-3">${o.koi_name}</td>
+          <td class="p-3">
+            <p class="font-bold text-silk">${o.customer_name}</p>
+            <p class="text-[10px] text-mist">${o.customer_phone} (${o.customer_city})</p>
+          </td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${o.payment_status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${o.payment_status}</span></td>
+          <td class="p-3">
+            <p class="font-bold text-silk">${o.shipping_courier}</p>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-mist font-mono">${o.shipping_status}</span>
+          </td>
+          <td class="p-3 flex gap-2">
+            <button onclick="openAddCheckpointModal('${o.order_id}')" class="px-3 py-1.5 rounded-lg bg-gold text-black font-bold text-[11px] hover:brightness-110">
+              <i class="fa-solid fa-location-dot mr-1"></i> Update Posisi
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAddCheckpointModal(orderId) {
+      document.getElementById('cpOrderId').value = orderId;
+      document.getElementById('cpOrderIdDisplay').textContent = orderId;
+      document.getElementById('modalAddCheckpoint').classList.remove('hidden');
+    }
+
+    async function handleSaveCheckpoint(e) {
+      e.preventDefault();
+      const payload = {
+        order_id: document.getElementById('cpOrderId').value,
+        stage: document.getElementById('cpStage').value,
+        title: document.getElementById('cpTitle').value,
+        location: document.getElementById('cpLocation').value,
+        description: document.getElementById('cpDesc').value
+      };
+
+      const res = await fetch('/api/admin/orders/add-checkpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Posisi pengiriman berhasil ditambahkan!');
+        closeAdminModal('modalAddCheckpoint');
+        loadAdminOrders();
+      }
+    }
+
+    // ==================== LIVE CHAT CS OPERATOR ====================
+    async function loadAdminChats() {
+      const res = await fetch('/api/admin/chats', { headers: { 'x-admin-token': adminToken } });
+      const chats = await res.json();
+      const list = document.getElementById('chatSessionList');
+
+      if (chats.length === 0) {
+        list.innerHTML = '<p class="text-xs text-mist p-4 text-center">Belum ada obrolan masuk.</p>';
+        return;
+      }
+
+      list.innerHTML = chats.map(c => `
+        <div onclick="selectChatSession('${c.session_id}', '${c.customer_name}')" class="p-3 border-b border-borderSubtle cursor-pointer hover:bg-surfaceLight transition ${currentSelectedChatSession === c.session_id ? 'bg-surfaceLight border-l-4 border-l-gold' : ''}">
+          <div class="flex justify-between items-center">
+            <p class="font-bold text-silk text-xs">${c.customer_name}</p>
+            <span class="text-[9px] text-zinc-500 font-mono">${new Date(c.last_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' })}</span>
+          </div>
+          <p class="text-[11px] text-mist truncate mt-1">${c.last_sender === 'admin' ? '✓ Anda: ' : ''}${c.last_message}</p>
+        </div>
+      `).join('');
+
+      if (currentSelectedChatSession) {
+        loadSessionMessages(currentSelectedChatSession);
+      }
+    }
+
+    function selectChatSession(sid, name) {
+      currentSelectedChatSession = sid;
+      document.getElementById('activeChatTarget').textContent = `Chat dengan: ${name}`;
+      loadSessionMessages(sid);
+      loadAdminChats();
+    }
+
+    async function loadSessionMessages(sid) {
+      const res = await fetch(`/api/chat/history/${sid}`);
+      const data = await res.json();
+      const feed = document.getElementById('adminChatFeed');
+      feed.innerHTML = data.messages.map(m => {
+        if (m.sender_type === 'admin') {
+          return `<div class="p-2.5 rounded-xl bg-gold/20 text-silk ml-auto max-w-[80%] text-right"><span class="text-[9px] text-gold block">Anda (Admin)</span>${m.message}</div>`;
+        } else if (m.sender_type === 'bot') {
+          return `<div class="p-2 rounded-lg bg-zinc-900 border border-borderSubtle text-zinc-400 max-w-[85%] text-[11px]"><span class="text-[9px] block">AI Bot Auto-Reply</span>${m.message}</div>`;
+        } else {
+          return `<div class="p-2.5 rounded-xl bg-surfaceLight border border-borderSubtle text-silk max-w-[80%]"><span class="text-[9px] text-emerald-400 block">${m.customer_name}</span>${m.message}</div>`;
+        }
+      }).join('');
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    async function handleAdminSendReply(e) {
+      e.preventDefault();
+      if (!currentSelectedChatSession) return alert('Pilih salah satu sesi chat terlebih dahulu');
+      const inp = document.getElementById('adminReplyInput');
+      const text = inp.value.trim();
+      if (!text) return;
+
+      inp.value = '';
+      await fetch('/api/admin/chat/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify({ session_id: currentSelectedChatSession, message: text })
+      });
+      loadSessionMessages(currentSelectedChatSession);
+    }
+
+    // Koi & Settings
+    async function loadAdminKoi() {
+      const res = await fetch('/api/koi');
+      const list = await res.json();
+      document.getElementById('adminKoiList').innerHTML = list.map(k => `
+        <div class="p-3 rounded-xl bg-surface border border-borderSubtle flex gap-3 text-xs">
+          <img src="${k.image}" class="w-16 h-16 rounded-lg object-cover">
+          <div>
+            <p class="font-bold text-silk">${k.name}</p>
+            <p class="text-mist">${k.variety} • Rp ${Number(k.price).toLocaleString('id-ID')}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openAddKoiModal() { document.getElementById('modalAddKoi').classList.remove('hidden'); }
+    async function handleSaveKoi(e) {
+      e.preventDefault();
+      const fd = new FormData();
+      fd.append('name', document.getElementById('koiName').value);
+      fd.append('variety', document.getElementById('koiVariety').value);
+      fd.append('size_cm', document.getElementById('koiSize').value);
+      fd.append('price', document.getElementById('koiPrice').value);
+      const file = document.getElementById('koiImageFile').files[0];
+      if (file) fd.append('imageFile', file);
+
+      await fetch('/api/koi', { method: 'POST', headers: { 'x-admin-token': adminToken }, body: fd });
+      closeAdminModal('modalAddKoi');
+      loadAdminKoi();
+    }
+
+    async function loadAdminSettings() {
+      const res = await fetch('/api/settings');
+      const s = await res.json();
+      document.getElementById('setFarmName').value = s.farm_name || '';
+      document.getElementById('setWa').value = s.wa_number || '';
+      document.getElementById('setPromoActive').checked = !!s.promo_active;
+      document.getElementById('setPromoText').value = s.promo_text || '';
+      document.getElementById('setCasakuLicense').value = s.casaku_license_key || '';
+      document.getElementById('setCasakuQrId').value = s.casaku_qr_id || '';
+    }
+
+    async function handleSaveSettings(e) {
+      e.preventDefault();
+      const payload = {
+        farm_name: document.getElementById('setFarmName').value,
+        wa_number: document.getElementById('setWa').value,
+        promo_active: document.getElementById('setPromoActive').checked ? 1 : 0,
+        promo_text: document.getElementById('setPromoText').value,
+        casaku_license_key: document.getElementById('setCasakuLicense').value,
+        casaku_qr_id: document.getElementById('setCasakuQrId').value
+      };
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify(payload)
+      });
+      alert('Pengaturan disimpan!');
+    }
+
+    function closeAdminModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (adminToken) {
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('adminApp').classList.remove('hidden');
+        loadAdminOrders();
+      }
+    });
+  </script>
+</body>
+</html>

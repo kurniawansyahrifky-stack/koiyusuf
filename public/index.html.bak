@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sabaku Nishikigoi — Lelang Resmi & Galeri Koi Juara</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Shippori+Mincho:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #08080A; color: #EDE8DF; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    .font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .font-kanji { font-family: 'Shippori Mincho', serif; }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #F5DEB3 0%, #C5A059 50%, #8E6F2F 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    #goldDustCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 35; }
+    .slide-item { transition: opacity 1.3s cubic-bezier(0.4, 0, 0.2, 1), transform 1.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .slide-active { opacity: 1 !important; transform: scale(1) !important; pointer-events: auto; }
+    .slide-hidden { opacity: 0 !important; transform: scale(1.06) !important; pointer-events: none; }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #C5A059; border-radius: 4px; }
+  </style>
+</head>
+<body class="selection:bg-[#C5A059] selection:text-[#08080A] bg-[#08080A]">
+
+  <canvas id="goldDustCanvas"></canvas>
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 w-full z-40 bg-[#08080A]/95 backdrop-blur-md border-b border-white/5 py-3.5 px-6 md:px-14 flex justify-between items-center transition">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-9 h-9 rounded-full border border-[#C5A059] flex items-center justify-center text-[#C5A059] font-kanji text-sm shadow-lg shadow-[#C5A059]/10">錦</div>
+      <div>
+        <h1 class="font-serif tracking-[0.2em] text-lg md:text-xl font-bold uppercase gold-gradient-text">Sabaku Nishikigoi</h1>
+        <p class="text-[9px] tracking-[0.35em] text-[#A0A0A5] uppercase -mt-0.5">Living Jewels • Blitar Heritage</p>
+      </div>
+    </div>
+
+    <div class="hidden md:flex items-center space-x-7 text-xs tracking-wider uppercase text-gray-300 font-medium">
+      <a href="#lelang" class="text-amber-400 font-bold hover:text-white flex items-center gap-1.5"><i class="fa-solid fa-gavel text-[#C5A059]"></i> Live Lelang</a>
+      <a href="#katalog" class="hover:text-[#C5A059] transition">Katalog Koi</a>
+      <a href="#panduan" class="hover:text-[#C5A059] transition">Panduan & Obat</a>
+      <a href="#ulasan" class="hover:text-[#C5A059] transition">Testimoni</a>
+      <a href="/admin-portal" class="hover:text-[#C5A059] transition text-stone-500">Portal Admin</a>
+    </div>
+
+    <!-- SOSMED & WA BUTTONS -->
+    <div class="flex items-center gap-2.5">
+      <a id="btnTikTok" href="#" target="_blank" class="w-8 h-8 rounded-full border border-white/10 hover:border-[#C5A059] flex items-center justify-center text-gray-300 hover:text-[#C5A059] transition shadow" title="TikTok Farm">
+        <i class="fa-brands fa-tiktok text-xs"></i>
+      </a>
+      <a id="btnIG" href="#" target="_blank" class="w-8 h-8 rounded-full border border-white/10 hover:border-[#C5A059] flex items-center justify-center text-gray-300 hover:text-[#C5A059] transition shadow" title="Instagram Farm">
+        <i class="fa-brands fa-instagram text-xs"></i>
+      </a>
+      <button onclick="openRegisterModal()" class="hidden sm:inline-block px-3 py-1.5 border border-[#C5A059] text-[#C5A059] hover:bg-[#C5A059] hover:text-black font-bold text-xs uppercase rounded transition">
+        Daftar Lelang
+      </button>
+      <a id="btnNavWA" href="#" target="_blank" class="px-4 py-2 bg-[#C5A059] hover:bg-[#F3D99A] text-black font-bold text-xs uppercase tracking-wider rounded transition flex items-center gap-1.5 shadow">
+        <i class="fa-brands fa-whatsapp"></i> <span class="hidden sm:inline">WhatsApp</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO SLIDER OTOMATIS BERJALAN SENDIRI -->
+  <header class="relative h-[88vh] w-full overflow-hidden flex items-center justify-center pt-14">
+    <div id="sliderWrapper" class="absolute inset-0 w-full h-full -z-10">
+      <div class="slide-item slide-active absolute inset-0 w-full h-full">
+        <img src="/uploads/hero-koi-1.jpg" class="w-full h-full object-cover brightness-[0.38] contrast-120" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/40 to-transparent"></div>
+      </div>
+      <div class="slide-item slide-hidden absolute inset-0 w-full h-full">
+        <img src="/uploads/hero-koi-2.jpg" class="w-full h-full object-cover brightness-[0.38] contrast-120" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/40 to-transparent"></div>
+      </div>
+      <div class="slide-item slide-hidden absolute inset-0 w-full h-full">
+        <img src="/uploads/hero-koi-3.jpg" class="w-full h-full object-cover brightness-[0.38] contrast-120" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/40 to-transparent"></div>
+      </div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-5">
+      <div class="inline-flex items-center gap-2 border border-[#C5A059]/40 bg-[#08080A]/80 backdrop-blur-md px-4 py-1.5 rounded-full text-xs">
+        <span class="font-kanji text-[#C5A059]">錦鯉</span>
+        <span class="w-1 h-1 rounded-full bg-[#C5A059]"></span>
+        <span class="text-[11px] tracking-widest text-[#EDE8DF] uppercase font-semibold">Authentic Japanese Bloodline • Lelang Resmi & Galeri</span>
+      </div>
+
+      <h2 id="heroTitle" class="font-serif text-5xl md:text-7xl lg:text-8xl font-normal leading-[1.08] tracking-tight">
+        Seni Hidup Di Atas Air, <br>
+        <span class="italic font-normal gold-gradient-text">Keanggunan Sisik Juara</span>
+      </h2>
+
+      <p id="heroSubtitle" class="text-[#A5A5AC] text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
+        Menghadirkan ikan koi pilihan berkarakter kokoh, postur punuk tebal, dan shiroji putih salju langsung dari kolam lumpur Blitar bersertifikat.
+      </p>
+
+      <div class="pt-6 flex flex-wrap justify-center items-center gap-4">
+        <a href="#lelang" class="px-8 py-3.5 bg-[#C5A059] text-[#08080A] text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#F3D99A] transition duration-300 shadow-xl shadow-[#C5A059]/10 rounded flex items-center gap-2">
+          <i class="fa-solid fa-gavel"></i> Masuk Arena Lelang
+        </a>
+        <a href="#katalog" class="px-8 py-3.5 border border-[#C5A059]/40 text-[#EDE8DF] text-xs uppercase tracking-[0.2em] font-semibold hover:border-[#C5A059] transition rounded">
+          Katalog Langsung Beli
+        </a>
+      </div>
+
+      <div class="pt-8 flex justify-center gap-2">
+        <button onclick="setSlide(0)" class="slide-dot w-8 h-[2px] bg-[#C5A059] transition-all"></button>
+        <button onclick="setSlide(1)" class="slide-dot w-4 h-[2px] bg-white/20 transition-all"></button>
+        <button onclick="setSlide(2)" class="slide-dot w-4 h-[2px] bg-white/20 transition-all"></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNER ATURAN LELANG RESMI -->
+  <section class="max-w-7xl mx-auto px-6 pt-12">
+    <div class="border border-amber-500/40 bg-[#121216] p-6 rounded-lg shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div class="space-y-1">
+        <h4 class="font-bold text-amber-400 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved"></i> Sistem Jaminan Deposit Rp 50.000 (Anti Penawar Hit & Run)
+        </h4>
+        <p class="text-xs text-gray-300 leading-relaxed">
+          Sebelum ngebid, wajib daftar data asli & deposit Rp 50.000 ke WA admin. 
+          <span class="text-emerald-400 font-medium">Kalah lelang? Uang kembali 100%.</span> 
+          <span class="text-rose-400 font-medium">Menang tapi kabur? Deposit hangus otomatis.</span>
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="openRulesModal()" class="px-4 py-2.5 border border-white/20 hover:border-amber-400 text-gray-300 text-xs font-semibold rounded whitespace-nowrap">
+          Baca Aturan
+        </button>
+        <button onclick="openRegisterModal()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider rounded whitespace-nowrap shadow">
+          Daftar & Konfirmasi Deposit
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. LIVE AUCTION (LELANG ALA MASTERKOI.BID LENGKAP OB, KB, TIMER) -->
+  <section id="lelang" class="py-20 px-6 md:px-14 max-w-7xl mx-auto">
+    <div class="text-center mb-12 space-y-2">
+      <span class="text-xs uppercase tracking-[0.3em] text-[#C5A059] font-bold flex items-center justify-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span> LIVE AUCTION
+      </span>
+      <h3 class="font-serif text-4xl md:text-5xl font-bold tracking-wide text-white">Panggung Lelang Nishikigoi</h3>
+      <p class="text-xs text-[#A5A5AC] font-light max-w-lg mx-auto">Pasang penawaran tertinggi Anda sebelum hitung mundur selesai. Sistem anti-sniper aktif otomatis.</p>
+      <div class="w-12 h-[1px] bg-[#C5A059] mx-auto mt-4"></div>
+    </div>
+
+    <!-- Grid Kartu Lelang -->
+    <div id="auctionGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+  </section>
+
+  <!-- 2. KATALOG REGULER (DENGAN FILTER VARIETAS & DESAIN KARTU MEWAH) -->
+  <section id="katalog" class="py-24 px-6 md:px-16 max-w-7xl mx-auto border-t border-white/5">
+    <div class="text-center mb-14 space-y-2">
+      <p class="font-kanji text-[#C5A059] text-xs tracking-[0.3em]">厳選された錦鯉</p>
+      <h3 class="font-serif text-4xl md:text-5xl font-bold tracking-wide text-white">Koleksi Reguler Siap Kirim</h3>
+      <p class="text-xs text-[#A5A5AC] font-light max-w-md mx-auto">Ikan pilihan dengan harga pas tanpa lelang. Garansi hidup sampai tujuan.</p>
+      <div class="w-12 h-[1px] bg-[#C5A059] mx-auto mt-4"></div>
+    </div>
+
+    <!-- Filter Varietas Lengkap -->
+    <div class="flex flex-wrap justify-center gap-2.5 mb-14 text-xs tracking-wider uppercase font-medium">
+      <button onclick="filterKoi('all', this)" class="koi-btn border border-[#C5A059] bg-[#C5A059]/20 text-[#C5A059] px-5 py-2.5 shadow-sm rounded">Semua Koleksi</button>
+      <button onclick="filterKoi('Kohaku', this)" class="koi-btn border border-white/10 text-[#A5A5AC] hover:border-[#C5A059]/40 hover:text-white px-5 py-2.5 transition rounded">Kohaku (赤白)</button>
+      <button onclick="filterKoi('Sanke', this)" class="koi-btn border border-white/10 text-[#A5A5AC] hover:border-[#C5A059]/40 hover:text-white px-5 py-2.5 transition rounded">Taisho Sanke (三色)</button>
+      <button onclick="filterKoi('Showa', this)" class="koi-btn border border-white/10 text-[#A5A5AC] hover:border-[#C5A059]/40 hover:text-white px-5 py-2.5 transition rounded">Showa Sanshoku (昭和)</button>
+      <button onclick="filterKoi('Tancho', this)" class="koi-btn border border-white/10 text-[#A5A5AC] hover:border-[#C5A059]/40 hover:text-white px-5 py-2.5 transition rounded">Tancho (丹頂)</button>
+    </div>
+
+    <!-- Grid Kartu Koi Mewah -->
+    <div id="koiGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+  </section>
+
+  <!-- 3. ENSIKLOPEDIA & PANDUAN PENYAKIT (PORTOFOLIO EDUKASI) -->
+  <section id="panduan" class="py-24 px-6 md:px-16 max-w-6xl mx-auto border-t border-white/5">
+    <div class="text-center mb-14 space-y-2">
+      <p class="font-kanji text-[#C5A059] text-xs tracking-[0.3em]">錦鯉の飼育と治療</p>
+      <h3 class="font-serif text-3xl md:text-4xl font-bold text-white">Ensiklopedia Perawatan & Penanganan Penyakit</h3>
+      <p class="text-xs text-[#A5A5AC] font-light max-w-lg mx-auto">Kami mendampingi hobi Anda dengan panduan medis teruji agar ikan selalu sehat dan prima di kolam rumah.</p>
+      <div class="w-12 h-[1px] bg-[#C5A059] mx-auto mt-4"></div>
+    </div>
+
+    <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+  </section>
+
+  <!-- 4. ULASAN & FORM TESTIMONI LENGKAP -->
+  <section id="ulasan" class="py-24 px-6 md:px-16 max-w-6xl mx-auto border-t border-white/5">
+    <div class="text-center mb-14 space-y-2">
+      <span class="text-xs uppercase tracking-[0.3em] text-[#C5A059] font-medium">Testimoni Penghobi</span>
+      <h3 class="font-serif text-3xl md:text-4xl font-bold text-white">Kepuasan Kolektor Kolam</h3>
+      <p class="text-xs text-gray-400">Ulasan nyata dari para penghobi koi yang telah berbelanja di farm kami.</p>
+      <div class="w-12 h-[1px] bg-[#C5A059] mx-auto mt-4"></div>
+    </div>
+
+    <div id="reviewsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"></div>
+
+    <!-- Form Tambah Ulasan Terverifikasi -->
+    <div class="border border-[#C5A059]/30 bg-[#121216] p-8 rounded shadow-2xl max-w-xl mx-auto space-y-4">
+      <h4 class="font-serif text-2xl font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-pen-fancy text-[#C5A059]"></i> Bagikan Pengalaman Anda
+      </h4>
+      <p class="text-[11px] text-gray-400">Masukkan nomor WhatsApp yang Anda gunakan saat bertransaksi untuk verifikasi.</p>
+
+      <form onsubmit="submitReview(event)" class="space-y-3 pt-2 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input type="text" id="revName" required placeholder="Nama Lengkap Anda" class="bg-[#08080A] border border-white/10 text-xs p-3 rounded text-white outline-none focus:border-[#C5A059]">
+          <input type="text" id="revPhone" required placeholder="Nomor WhatsApp Pembelian" class="bg-[#08080A] border border-white/10 text-xs p-3 rounded text-white outline-none focus:border-[#C5A059]">
+        </div>
+        <input type="text" id="revKoi" placeholder="Varietas yang dibeli (mis: Kohaku 38cm)" class="w-full bg-[#08080A] border border-white/10 text-xs p-3 rounded text-white outline-none focus:border-[#C5A059]">
+        <select id="revRating" class="w-full bg-[#08080A] border border-white/10 text-xs p-3 rounded text-white outline-none focus:border-[#C5A059]">
+          <option value="5">⭐⭐⭐⭐⭐ Bintang 5 (Sangat Puas & Ikan Sehat)</option>
+          <option value="4">⭐⭐⭐⭐ Bintang 4 (Kondisi Sangat Baik)</option>
+          <option value="3">⭐⭐⭐ Bintang 3 (Standar)</option>
+        </select>
+        <textarea id="revComment" required rows="2" placeholder="Tuliskan pengalaman Anda mengenai packing, kesehatan ikan, atau keindahan corak..." class="w-full bg-[#08080A] border border-white/10 text-xs p-3 rounded text-white outline-none focus:border-[#C5A059]"></textarea>
+        <button type="submit" class="w-full py-3 bg-[#C5A059] hover:bg-[#F3D99A] text-black font-bold text-xs uppercase tracking-widest rounded shadow transition">Kirim Ulasan</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER DENGAN SOSMED (TIKTOK, IG, WA) -->
+  <footer class="border-t border-white/5 py-14 px-6 md:px-16 bg-[#08080A] text-xs text-[#8E8E93]">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="space-y-1.5 text-center md:text-left">
+        <h4 class="font-serif text-lg text-[#EDE8DF] font-bold">Sabaku Nishikigoi Farm</h4>
+        <p class="text-[11px] text-[#A5A5AC]">Living Jewels of Japan — Blitar Breeding Heritage.</p>
+      </div>
+
+      <!-- Icon Sosmed Footer -->
+      <div class="flex items-center gap-5 text-lg">
+        <a id="footerTikTok" href="#" target="_blank" class="text-gray-400 hover:text-[#C5A059] transition" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        <a id="footerIG" href="#" target="_blank" class="text-gray-400 hover:text-[#C5A059] transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a id="footerWA" href="#" target="_blank" class="text-gray-400 hover:text-[#C5A059] transition" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <span>© 2026 Sabaku Nishikigoi Farm.</span>
+        <a href="/admin-portal" title="Portal Admin Master" class="w-7 h-7 border border-[#C5A059]/40 bg-[#121216] text-[#C5A059] hover:border-[#C5A059] rounded flex items-center justify-center font-kanji text-[11px] transition">
+          印
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL PENDAFTARAN PESERTA LELANG -->
+  <div id="registerModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#121216] border border-amber-500/50 p-6 md:p-7 max-w-md w-full rounded shadow-2xl space-y-4 text-xs">
+      <div class="flex justify-between items-start border-b border-white/10 pb-3">
+        <div>
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i class="fa-solid fa-id-card text-amber-400"></i> Pendaftaran Akun Peserta Lelang
+          </h3>
+          <p class="text-[11px] text-gray-400 mt-0.5">Daftar sekali untuk mengikuti semua sesi lelang.</p>
+        </div>
+        <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+      </div>
+
+      <div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded text-[11px] text-amber-300 space-y-1">
+        <p class="font-bold">Ketentuan Deposit Jaminan Rp 50.000:</p>
+        <p>1. Transfer Rp 50.000 ke WhatsApp admin.</p>
+        <p>2. Saldo kembali 100% jika Anda kalah lelang.</p>
+        <p>3. Jika menang lelang tapi mangkir/kabur, deposit otomatis <b>hangus</b>.</p>
+      </div>
+
+      <form onsubmit="submitRegisterBidder(event)" class="space-y-3">
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Nama Lengkap (Sesuai KTP):</label>
+          <input type="text" id="regName" required placeholder="Contoh: Budi Santoso" class="w-full bg-[#08080A] border border-white/10 p-2.5 rounded text-white outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Nomor WhatsApp Aktif:</label>
+          <input type="text" id="regPhone" required placeholder="Contoh: 081234567890" class="w-full bg-[#08080A] border border-white/10 p-2.5 rounded text-white outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Kota Domisili:</label>
+          <input type="text" id="regCity" required placeholder="Contoh: Bandung" class="w-full bg-[#08080A] border border-white/10 p-2.5 rounded text-white outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">Alamat Lengkap Pengiriman Ikan:</label>
+          <textarea id="regAddress" required rows="2" placeholder="Jl. Melati No. 5, RT 01/RW 02..." class="w-full bg-[#08080A] border border-white/10 p-2.5 rounded text-white outline-none focus:border-amber-400"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase rounded tracking-wider shadow">
+          Daftar & Konfirmasi Deposit via WA
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL BACA RULES LENGKAP -->
+  <div id="rulesModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#121216] border border-white/10 p-6 max-w-lg w-full rounded shadow-2xl space-y-4 text-xs">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 class="font-bold text-white text-base text-amber-400">Aturan Resmi Lelang Koi (Deposit Rp 50.000)</h3>
+        <button onclick="closeRulesModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+      </div>
+      <div class="space-y-3 text-gray-300 leading-relaxed max-h-80 overflow-y-auto pr-1">
+        <p><b>1. Wajib Deposit Jaminan:</b> Setiap calon penawar wajib mentransfer uang jaminan Rp 50.000 ke WhatsApp admin sebelum tawarannya dapat disahkan.</p>
+        <p><b>2. Anti-Sniper (Perpanjangan Waktu):</b> Jika ada bid masuk pada 5 menit terakhir penutupan, waktu lelang otomatis diperpanjang 5 menit secara adil.</p>
+        <p><b>3. Pemenang Lelang:</b> Pemenang wajib melunasi ikan dalam 1x24 jam. Deposit Rp 50.000 otomatis menjadi pemotong harga total ikan.</p>
+        <p><b>4. Sanksi Hit & Run:</b> Bila pemenang kabur/tidak menebus ikan, deposit Rp 50.000 dinyatakan <b>HANGUS 100%</b>.</p>
+        <p><b>5. Jaminan Uang Kembali (Peserta Kalah):</b> Peserta yang tidak memenangkan ikan berhak menarik kembali saldo depositnya 100% utuh lewat WhatsApp admin.</p>
+      </div>
+      <button onclick="closeRulesModal()" class="w-full py-2.5 bg-stone-800 text-gray-200 rounded">Saya Paham</button>
+    </div>
+  </div>
+
+  <!-- MODAL BID LELANG (CEK OTOMATIS VERIFIKASI DEPOSIT & LEADERBOARD) -->
+  <div id="bidModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#121216] border border-[#C5A059]/40 p-6 md:p-7 max-w-md w-full rounded shadow-2xl space-y-4 text-xs">
+      
+      <!-- Header Info Ikan -->
+      <div class="flex justify-between items-start border-b border-white/10 pb-3">
+        <div>
+          <span id="modalCode" class="text-[10px] font-bold bg-[#C5A059] text-black px-2 py-0.5 rounded">A</span>
+          <h3 id="modalKoiName" class="font-serif text-xl font-bold text-white mt-1">Nama Koi</h3>
+          <p id="modalSpecs" class="text-xs text-gray-400">45cm • Female</p>
+        </div>
+        <button onclick="closeBidModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+      </div>
+
+      <!-- KOTAK HARGA PEMENANG LIVE SAAT INI -->
+      <div class="bg-[#08080A] p-3.5 rounded border border-amber-500/20 space-y-1.5">
+        <div class="flex justify-between items-baseline">
+          <span class="text-gray-400 text-xs">Bid Tertinggi Saat Ini:</span>
+          <span id="modalCurrentBid" class="font-serif text-2xl font-bold text-[#C5A059]">Rp 0</span>
+        </div>
+        <div class="flex justify-between text-[11px] pt-1 border-t border-white/5 text-gray-400">
+          <span>🥇 Pemenang Sementara: <b id="modalLeader" class="text-emerald-400 font-bold">-</b> (<span id="modalCity">-</span>)</span>
+          <span>KB: <b id="modalStep" class="text-amber-400">+Rp 50.000</b></span>
+        </div>
+      </div>
+
+      <!-- PAPAN PERINGKAT PENAWAR LELANG LIVE -->
+      <div>
+        <span class="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">Papan Peringkat Penawar (Leaderboard):</span>
+        <div id="modalBidHistory" class="space-y-1.5 max-h-28 overflow-y-auto pr-1 text-xs divide-y divide-white/5 custom-scroll"></div>
+      </div>
+
+      <!-- FORM VERIFIKASI WHATSAPP & BID -->
+      <form onsubmit="submitBid(event)" class="space-y-3 pt-2 border-t border-white/10">
+        <input type="hidden" id="bidAuctionId">
+
+        <!-- Input WhatsApp Pemverifikasi -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[11px] text-gray-400">Nomor WhatsApp Terdaftar Anda:</label>
+            <button type="button" onclick="checkBidderStatus()" class="text-[10px] text-amber-400 hover:underline">Cek Status Deposit</button>
+          </div>
+          <input type="text" id="bidWA" required placeholder="Masukkan nomor WA (mis: 081234567890)" class="w-full bg-[#08080A] border border-white/10 p-2.5 rounded text-white outline-none focus:border-[#C5A059]">
+          <p id="bidderStatusFeedback" class="text-[10px] mt-1 text-gray-400"></p>
+        </div>
+
+        <!-- Nominal Bid -->
+        <div>
+          <label class="block text-[11px] text-gray-400 mb-1">Tawaran Anda Berikutnya (Rp):</label>
+          <input type="number" id="bidAmount" required class="w-full bg-[#08080A] border border-[#C5A059] p-2.5 rounded text-[#C5A059] font-bold text-base outline-none font-mono">
+          <div class="flex gap-1.5 mt-2">
+            <button type="button" onclick="addBidQuick(50000)" class="flex-1 py-1.5 bg-stone-800 text-gray-200 text-[10px] rounded">+50 Ribu</button>
+            <button type="button" onclick="addBidQuick(100000)" class="flex-1 py-1.5 bg-stone-800 text-gray-200 text-[10px] rounded">+100 Ribu</button>
+            <button type="button" onclick="addBidQuick(200000)" class="flex-1 py-1.5 bg-stone-800 text-gray-200 text-[10px] rounded">+200 Ribu</button>
+          </div>
+        </div>
+
+        <button type="submit" id="btnSubmitBid" class="w-full py-3 bg-[#C5A059] hover:bg-[#F3D99A] text-black font-bold uppercase rounded shadow transition">
+          Kirim Tawaran (BID SEKARANG)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let auctionsData = [];
+    let allKois = [];
+    let currentAuction = null;
+    let waPhone = "6281219623569";
+    const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+
+    // EFEK DEBU EMAS
+    const canvas = document.getElementById('goldDustCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth, height = canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
+    const particles = Array.from({ length: 35 }, () => ({ x: Math.random() * width, y: Math.random() * height, size: Math.random() * 2.2 + 0.8, sy: -(Math.random() * 0.8 + 0.3), op: Math.random() * 0.5 + 0.2 }));
+    function drawGoldDust() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.y += p.sy; if (p.y < 0) { p.y = height + 10; p.x = Math.random() * width; }
+        ctx.fillStyle = `rgba(212, 175, 55, ${p.op})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+      });
+      requestAnimationFrame(drawGoldDust);
+    }
+    drawGoldDust();
+
+    // SLIDER HERO OTOMATIS
+    const slideData = [
+      {
+        title: "Seni Hidup Di Atas Air, <br><span class='italic font-normal gold-gradient-text'>Keanggunan Sisik Juara</span>",
+        desc: "Menghadirkan ikan koi pilihan berkarakter kokoh, postur punuk tebal, dan shiroji putih salju langsung dari kolam lumpur Blitar bersertifikat."
+      },
+      {
+        title: "Kemurnian Darah Indukan, <br><span class='italic font-normal gold-gradient-text'>Pola Tegas Berkarakter</span>",
+        desc: "Pola beni merah membara dengan kiwa tajam memukau, disiapkan khusus untuk keindahan kolam para penghobi sejati."
+      },
+      {
+        title: "Dedikasi & Karantina Medis, <br><span class='italic font-normal gold-gradient-text'>Kebugaran Terjamin 100%</span>",
+        desc: "Bebas parasit dan jamur dengan protokol sterilisasi kolam terpadu sebelum ikan dikirim ke rumah Anda."
+      }
+    ];
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-item');
+    const dots = document.querySelectorAll('.slide-dot');
+
+    function setSlide(index) {
+      currentSlide = index;
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) { s.classList.remove('slide-hidden'); s.classList.add('slide-active'); }
+        else { s.classList.remove('slide-active'); s.classList.add('slide-hidden'); }
+      });
+      dots.forEach((d, idx) => {
+        if (idx === currentSlide) d.className = "slide-dot w-8 h-[2px] bg-[#C5A059] transition-all";
+        else d.className = "slide-dot w-4 h-[2px] bg-white/20 transition-all";
+      });
+      document.getElementById('heroTitle').innerHTML = slideData[currentSlide].title;
+      document.getElementById('heroSubtitle').innerText = slideData[currentSlide].desc;
+    }
+    setInterval(() => { setSlide((currentSlide + 1) % slides.length); }, 5500);
+
+    // AMBIL SEMUA DATA DARI SERVER
+    async function loadAllData() {
+      try {
+        const [aRes, kRes, artRes, revRes, sRes] = await Promise.all([
+          fetch('/api/auctions'), fetch('/api/koi'), fetch('/api/articles'), fetch('/api/reviews'), fetch('/api/settings')
+        ]);
+        
+        auctionsData = await aRes.json();
+        renderAuctions(auctionsData);
+        startCountdowns();
+
+        allKois = await kRes.json();
+        renderKoi(allKois);
+
+        const articles = await artRes.json();
+        renderArticles(articles);
+
+        const reviews = await revRes.json();
+        renderReviews(reviews);
+
+        const settings = await sRes.json();
+        if (settings) {
+          waPhone = settings.wa_number || waPhone;
+          document.getElementById('btnNavWA').href = `https://wa.me/${waPhone}`;
+          document.getElementById('footerWA').href = `https://wa.me/${waPhone}`;
+          if (settings.tiktok_url) {
+          let tt = settings.tiktok_url.trim();
+          if (!tt.startsWith("http")) tt = "https://tiktok.com/@" + tt.replace(/^@/, "");
+          document.getElementById("btnTikTok").href = tt;
+          document.getElementById("footerTikTok").href = tt;
+        }
+        if (settings.ig_url) {
+          let ig = settings.ig_url.trim();
+          if (!ig.startsWith("http")) ig = "https://instagram.com/" + ig.replace(/^@/, "");
+          document.getElementById("btnIG").href = ig;
+          document.getElementById("footerIG").href = ig;
+        }
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    // 1. RENDER KARTU LELANG ALA MASTERKOI.BID
+    function renderAuctions(items) {
+      const grid = document.getElementById('auctionGrid');
+      if (!items || items.length === 0) {
+        grid.innerHTML = '<p class="col-span-full text-center text-xs text-gray-500 py-12">Belum ada sesi lelang aktif saat ini.</p>';
+        return;
+      }
+
+      grid.innerHTML = items.map(a => `
+        <div class="bg-[#121216] border border-white/10 rounded-lg overflow-hidden flex flex-col justify-between shadow-2xl hover:border-[#C5A059]/50 transition duration-300">
+          <div class="relative aspect-[4/3] bg-black overflow-hidden">
+            <img src="${a.image}" class="w-full h-full object-cover">
+            
+            <div class="absolute top-3 left-3 flex items-center gap-2">
+              <span class="w-8 h-8 rounded bg-[#C5A059] text-black font-black flex items-center justify-center text-sm shadow">${a.code}</span>
+              <div class="bg-black/85 px-2.5 py-1 rounded text-[10px] text-white font-mono border border-white/10">
+                ${a.size_cm} CM • ${a.gender}
+              </div>
+            </div>
+
+            <span class="absolute top-3 right-3 bg-black/85 text-[#C5A059] border border-[#C5A059]/30 text-[10px] px-2.5 py-0.5 rounded font-kanji">
+              ${a.breeder}
+            </span>
+
+            ${a.is_closed ? '<div class="absolute inset-0 bg-black/85 flex items-center justify-center font-bold text-rose-500 text-sm tracking-widest">LELANG SELESAI</div>' : ''}
+          </div>
+
+          <div class="p-5 flex flex-col justify-between flex-grow space-y-3.5">
+            <div>
+              <h4 class="font-serif text-lg font-bold text-white tracking-wide truncate">${a.code}. ${a.koi_name}</h4>
+              <p class="text-[11px] text-gray-400">${a.variety}</p>
+            </div>
+
+            <div class="pt-2 border-t border-white/5 space-y-1">
+              <div class="flex justify-between text-[11px] text-gray-400">
+                <span>OB: <b class="text-white">${formatIDR(a.open_bid)}</b></span>
+                <span>KB: <b class="text-amber-300">+${formatIDR(a.bid_step)}</b></span>
+              </div>
+              <div class="flex justify-between items-baseline pt-1">
+                <span class="text-[10px] text-gray-400 uppercase">Bid Tertinggi:</span>
+                <span class="font-serif text-xl font-bold text-[#C5A059]">${formatIDR(a.current_bid)}</span>
+              </div>
+              <p class="text-[10px] text-gray-400">🥇 Pemenang Sementara: <b class="text-emerald-400">${a.highest_bidder || 'Belum Ada'}</b> (${a.highest_city || '-'})</p>
+            </div>
+
+            <!-- Timer Countdown -->
+            <div class="py-2 px-3 bg-[#08080A] rounded border border-white/5 text-center">
+              <span class="text-[9px] text-gray-400 uppercase tracking-wider block mb-0.5">Sisa Waktu Lelang:</span>
+              <span id="timer-${a.id}" data-end="${a.end_time}" class="countdown-label text-sm font-mono font-bold text-amber-400">
+                Memuat waktu...
+              </span>
+            </div>
+
+            <button onclick="openBidModal(${a.id})" ${a.is_closed ? 'disabled' : ''} class="w-full py-2.5 bg-[#C5A059] hover:bg-[#F3D99A] text-black font-bold text-xs uppercase tracking-wider rounded transition flex items-center justify-center gap-1.5 shadow ${a.is_closed ? 'opacity-40 cursor-not-allowed' : ''}">
+              <i class="fa-solid fa-gavel"></i> ${a.is_closed ? 'Lelang Selesai' : 'BID Sekarang!'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function startCountdowns() {
+      setInterval(() => {
+        document.querySelectorAll('.countdown-label').forEach(el => {
+          const endTime = new Date(el.getAttribute('data-end')).getTime();
+          const diff = endTime - Date.now();
+
+          if (diff <= 0) {
+            el.innerText = "WAKTU HABIS";
+            el.className = "text-xs font-bold text-rose-400";
+            return;
+          }
+
+          const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+          el.innerText = `${d}h : ${h}j : ${m}m : ${s}d`;
+        });
+      }, 1000);
+    }
+
+    // MODAL BID & LEADERBOARD LELANG
+    async function openBidModal(id) {
+      currentAuction = auctionsData.find(a => a.id === id);
+      if (!currentAuction) return;
+      document.getElementById('bidAuctionId').value = currentAuction.id;
+      document.getElementById('modalCode').innerText = currentAuction.code;
+      document.getElementById('modalKoiName').innerText = `${currentAuction.code}. ${currentAuction.koi_name}`;
+      document.getElementById('modalSpecs').innerText = `${currentAuction.size_cm} CM • ${currentAuction.gender} • ${currentAuction.variety}`;
+      document.getElementById('modalCurrentBid').innerText = formatIDR(currentAuction.current_bid);
+      document.getElementById('modalLeader').innerText = currentAuction.highest_bidder || 'Belum Ada';
+      document.getElementById('modalCity').innerText = currentAuction.highest_city || '-';
+      document.getElementById('modalStep').innerText = `+${formatIDR(currentAuction.bid_step)}`;
+      document.getElementById('bidAmount').value = currentAuction.current_bid + currentAuction.bid_step;
+
+      const savedPhone = localStorage.getItem('koi_bidder_phone') || '';
+      if (savedPhone) {
+        document.getElementById('bidWA').value = savedPhone;
+        checkBidderStatus();
+      }
+
+      const res = await fetch(`/api/auctions/${id}/bids`);
+      const bids = await res.json();
+      const histEl = document.getElementById('modalBidHistory');
+      
+      if (!bids || bids.length === 0) {
+        histEl.innerHTML = '<p class="text-[10px] text-gray-500 py-1 italic">Belum ada penawar. Tawaran pertama akan langsung memimpin!</p>';
+      } else {
+        histEl.innerHTML = bids.map((b, idx) => {
+          let rankBadge = `<span class="text-[10px] text-gray-400 font-mono">#${idx + 1}</span>`;
+          if (idx === 0) rankBadge = `<span class="text-xs">🥇</span> <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-1 font-bold rounded">MEMIMPIN</span>`;
+          if (idx === 1) rankBadge = `<span class="text-xs">🥈</span>`;
+          if (idx === 2) rankBadge = `<span class="text-xs">🥉</span>`;
+
+          return `
+            <div class="flex justify-between items-center py-1 text-[11px] ${idx === 0 ? 'bg-amber-500/10 p-1.5 rounded' : ''}">
+              <div class="flex items-center gap-1.5">
+                ${rankBadge}
+                <b class="text-white">${b.name}</b>
+                <span class="text-[10px] text-gray-400">(${b.city})</span>
+              </div>
+              <span class="font-mono font-bold text-[#C5A059]">${formatIDR(b.amount)}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('bidModal').classList.remove('hidden');
+    }
+
+    function closeBidModal() { document.getElementById('bidModal').classList.add('hidden'); }
+    function addBidQuick(v) { document.getElementById('bidAmount').value = parseInt(document.getElementById('bidAmount').value || 0) + v; }
+
+    async function checkBidderStatus() {
+      const phone = document.getElementById('bidWA').value.trim();
+      const feedback = document.getElementById('bidderStatusFeedback');
+      if (!phone) return;
+
+      const res = await fetch(`/api/bidders/check/${phone}`);
+      const data = await res.json();
+
+      if (data.deposit_status === 'VERIFIED') {
+        feedback.innerHTML = `<span class="text-emerald-400 font-bold">✅ Terverifikasi: ${data.name} (${data.city}) — Deposit Rp 50.000 Aktif</span>`;
+        localStorage.setItem('koi_bidder_phone', phone);
+      } else if (data.deposit_status === 'PENDING') {
+        feedback.innerHTML = `<span class="text-amber-400">⚠️ Sudah daftar, tapi deposit Rp 50.000 belum di-ACC Admin. Hubungi WA Admin!</span>`;
+      } else {
+        feedback.innerHTML = `<span class="text-rose-400">❌ Nomor belum terdaftar! Silakan klik tombol 'Daftar Lelang' di atas.</span>`;
+      }
+    }
+
+    async function submitBid(e) {
+      e.preventDefault();
+      const wa = document.getElementById('bidWA').value.trim();
+      const amount = parseInt(document.getElementById('bidAmount').value);
+
+      const res = await fetch('/api/auctions/bid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auction_id: document.getElementById('bidAuctionId').value, wa, amount })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error);
+        if (data.error.includes("belum terdaftar")) openRegisterModal();
+        return;
+      }
+
+      alert("🎉 Selamat! Tawaran Anda berhasil diajukan dan memimpin lelang!");
+      localStorage.setItem('koi_bidder_phone', wa);
+      closeBidModal();
+      loadAllData();
+    }
+
+    function openRegisterModal() { document.getElementById('registerModal').classList.remove('hidden'); }
+    function closeRegisterModal() { document.getElementById('registerModal').classList.add('hidden'); }
+    function openRulesModal() { document.getElementById('rulesModal').classList.remove('hidden'); }
+    function closeRulesModal() { document.getElementById('rulesModal').classList.add('hidden'); }
+
+    async function submitRegisterBidder(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const city = document.getElementById('regCity').value.trim();
+      const address = document.getElementById('regAddress').value.trim();
+
+      const res = await fetch('/api/bidders/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, city, address })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("✅ Pendaftaran berhasil! Anda akan dialihkan ke WhatsApp Admin untuk konfirmasi pembayaran deposit Rp 50.000.");
+        localStorage.setItem('koi_bidder_phone', phone);
+        closeRegisterModal();
+        const text = `Halo Admin Sabaku Nishikigoi, saya telah mengisi formulir pendaftaran lelang dan ingin transfer uang jaminan deposit Rp 50.000.\n\nData Pendaftar:\n- Nama: ${name}\n- WhatsApp: ${phone}\n- Kota: ${city}\n- Alamat: ${address}\n\nMohon kirimkan rekening bank / QRIS pembayaran deposit. Terima kasih.`;
+        window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`, '_blank');
+      } else {
+        alert(data.error);
+      }
+    }
+
+    // 2. RENDER KATALOG REGULER (LENGKAP DENGAN FILTER VARIETAS & KARTU MEWAH)
+    function renderKoi(items) {
+      const grid = document.getElementById('koiGrid');
+      if (!items || items.length === 0) {
+        grid.innerHTML = '<p class="col-span-full text-center text-xs text-[#A5A5AC] py-16">Belum ada koleksi ikan koi di kolam display.</p>';
+        return;
+      }
+      grid.innerHTML = items.map(k => `
+        <div class="bg-[#121216] border border-white/5 hover:border-[#C5A059]/40 transition duration-500 rounded overflow-hidden flex flex-col justify-between shadow-xl group">
+          <div class="relative aspect-[4/3] overflow-hidden bg-black cursor-pointer">
+            <img src="${k.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 opacity-90 group-hover:opacity-100">
+            <span class="absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-sm shadow ${k.is_sold ? 'bg-red-900/90 text-red-200' : 'bg-[#C5A059] text-black'}">
+              ${k.is_sold ? 'TERJUAL' : 'READY STOCK'}
+            </span>
+            <span class="absolute top-3 right-3 text-[10px] bg-[#08080A]/90 text-[#EDE8DF] border border-[#C5A059]/30 px-2.5 py-1 font-mono tracking-wider shadow rounded-sm">
+              ${k.size_cm} cm • ${k.gender}
+            </span>
+          </div>
+
+          <div class="p-6 flex flex-col justify-between flex-grow space-y-4">
+            <div>
+              <div class="flex justify-between items-start">
+                <h4 class="font-serif text-xl font-bold text-white tracking-wide">${k.name}</h4>
+                <span class="text-[10px] text-[#C5A059] bg-[#08080A] px-2 py-0.5 border border-white/5 rounded font-kanji">${k.variety}</span>
+              </div>
+              <p class="text-[11px] text-[#C5A059] font-medium mt-1">Breeder: ${k.breeder}</p>
+              <p class="text-xs text-[#A5A5AC] font-light mt-2.5 leading-relaxed line-clamp-2">${k.desc || 'Ikan berkarakter tenang, sisik berkilau sehat, nafsu makan agresif.'}</p>
+            </div>
+
+            <div class="pt-4 border-t border-white/5 flex justify-between items-center">
+              <div>
+                <span class="text-[9px] text-[#8E8E93] uppercase tracking-wider block">Harga Ikan:</span>
+                <span class="font-serif text-xl font-bold text-[#C5A059]">${formatIDR(k.price)}</span>
+              </div>
+              ${k.is_sold ? 
+                '<span class="text-xs text-stone-500 italic">Sudah Terjual</span>' : 
+                `<a href="https://wa.me/${waPhone}?text=${encodeURIComponent('Halo Sabaku Nishikigoi, saya berminat dengan ikan: ' + k.name + ' (' + k.size_cm + 'cm - ' + formatIDR(k.price) + '). Boleh minta video renang terbarunya?')}" target="_blank" class="px-4 py-2 bg-[#C5A059] hover:bg-[#F3D99A] text-black text-xs font-bold uppercase tracking-wider rounded transition flex items-center gap-1.5 shadow">
+                  <i class="fa-brands fa-whatsapp"></i> Beli
+                </a>`
+              }
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterKoi(variety, btn) {
+      document.querySelectorAll('.koi-btn').forEach(b => {
+        b.className = "koi-btn border border-white/10 text-[#A5A5AC] hover:border-[#C5A059]/40 hover:text-white px-5 py-2.5 transition rounded";
+      });
+      btn.className = "koi-btn border border-[#C5A059] bg-[#C5A059]/20 text-[#C5A059] px-5 py-2.5 shadow-sm rounded";
+      if (variety === 'all') renderKoi(allKois);
+      else renderKoi(allKois.filter(k => k.variety.toLowerCase().includes(variety.toLowerCase())));
+    }
+
+    // 3. RENDER ENSIKLOPEDIA ARTIKEL
+    function renderArticles(items) {
+      document.getElementById('articlesGrid').innerHTML = items.map(a => `
+        <div class="border border-white/5 bg-[#121216] p-6 rounded space-y-3 shadow-lg flex flex-col justify-between">
+          <div class="space-y-2">
+            <span class="text-[10px] font-bold text-[#C5A059] uppercase tracking-wider bg-[#08080A] px-2.5 py-1 border border-white/5 rounded inline-block">${a.category}</span>
+            <h4 class="font-serif text-xl font-bold text-white leading-snug">${a.title}</h4>
+            <p class="text-xs text-[#A5A5AC] font-light leading-relaxed">${a.content}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 4. RENDER ULASAN
+    function renderReviews(items) {
+      document.getElementById('reviewsGrid').innerHTML = items.map(r => `
+        <div class="border border-white/5 bg-[#121216] p-5 rounded space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-white">${r.customer_name}</span>
+            <span class="text-amber-400">${'★'.repeat(r.rating)}</span>
+          </div>
+          <p class="text-xs text-[#EDE8DF] italic font-light leading-relaxed">"${r.comment}"</p>
+          <span class="text-[10px] text-[#C5A059] block tracking-wide">Koleksi: ${r.variety_bought || 'Nishikigoi'}</span>
+        </div>
+      `).join('');
+    }
+
+    async function submitReview(e) {
+      e.preventDefault();
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: document.getElementById('revName').value,
+          customer_phone: document.getElementById('revPhone').value,
+          variety_bought: document.getElementById('revKoi').value,
+          rating: document.getElementById('revRating').value,
+          comment: document.getElementById('revComment').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) return alert(data.error);
+      alert('Terima kasih atas ulasan terverifikasi Anda!');
+      e.target.reset();
+      loadAllData();
+    }
+
+    loadAllData();
+  </script>
+</body>
+</html>
